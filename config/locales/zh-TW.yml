@@ -1569,3 +1569,8 @@
   label_subtask_remove: 移除子任務
   button_remove: 移除
   label_open_in_full_view: 以全頁模式開啟
+  label_add_user_to_group: "Add to group"
+  label_remove_user_from_group: "Remove from group"
+  text_remove_user_from_group_confirmation:
+    one: "Are you sure you want to remove 1 user from the group '%{groupname}'?\n\n%{users}"
+    other: "Are you sure you want to remove %{count} users from the group '%{groupname}'?\n\n%{users}"

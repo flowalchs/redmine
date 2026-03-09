@@ -1478,3 +1478,8 @@ en:
   reaction_text_x_other_users:
     one: "1 other"
     other: "%{count} others"
+  label_add_user_to_group: "Add to group"
+  label_remove_user_from_group: "Remove from group"
+  text_remove_user_from_group_confirmation:
+    one: "Are you sure you want to remove 1 user from the group '%{groupname}'?\n\n%{users}"
+    other: "Are you sure you want to remove %{count} users from the group '%{groupname}'?\n\n%{users}"
