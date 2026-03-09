@@ -134,6 +134,29 @@ class ContextMenusController < ApplicationController
     if @users.size == 1
       @user = @users.first
     end
+    @user_ids = @users.map(&:id)
+
+    @groups_for_remove = Group.givable
+      .joins(:groups_users)
+      .where(groups_users: { user_id: @user_ids })
+      .distinct
+      .order(:name)
+
+    @groups_for_add = Group.givable
+          .joins(<<-SQL.squish)
+          LEFT JOIN groups_users gu
+                 ON gu.group_id = #{Group.table_name}.id
+                AND gu.user_id IN (#{@user_ids.map { |i| ActiveRecord::Base.connection.quote(i) }.join(',')})
+          SQL
+          .group("#{Group.table_name}.id")
+          .having('COUNT(DISTINCT gu.user_id) < ?', @user_ids.size)
+          .order(:name)
+
+    if @users.size <= 10
+      names = @users.map { |u| "#{u.firstname} #{u.lastname}".strip }
+      @user_names = names.join("\n")
+    end
+
     render layout: false
   end
 end

@@ -346,7 +346,8 @@ Rails.application.routes.draw do
 
   get 'groups/:id/users/new', :to => 'groups#new_users', :id => /\d+/, :as => 'new_group_users'
   post 'groups/:id/users', :to => 'groups#add_users', :id => /\d+/, :as => 'group_users'
-  delete 'groups/:id/users/:user_id', :to => 'groups#remove_user', :id => /\d+/, :as => 'group_user'
+  delete 'groups/:id/users/:user_id', :to => 'groups#remove_users', :id => /\d+/, :as => 'group_user'
+  delete 'groups/:id/users', :to => 'groups#remove_users', :id => /\d+/, :as => 'group_remove_users'
 
   resources :trackers, :except => :show do
     collection do

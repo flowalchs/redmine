@@ -23,9 +23,9 @@ class GroupsController < ApplicationController
 
   before_action :require_admin, :except => [:show]
   before_action :find_group, :except => [:index, :new, :create]
-  accept_api_auth :index, :show, :create, :update, :destroy, :add_users, :remove_user
+  accept_api_auth :index, :show, :create, :update, :destroy, :add_users, :remove_users
 
-  require_sudo_mode :add_users, :remove_user, :create, :update, :destroy, :edit_membership, :destroy_membership
+  require_sudo_mode :add_users, :remove_users, :create, :update, :destroy, :edit_membership, :destroy_membership
 
   helper :custom_fields
   helper :principal_memberships
@@ -117,7 +117,10 @@ class GroupsController < ApplicationController
     @users = User.not_in_group(@group).where(:id => (params[:user_id] || params[:user_ids])).to_a
     @group.users << @users
     respond_to do |format|
-      format.html {redirect_to edit_group_path(@group, :tab => 'users')}
+      format.html do
+        flash[:notice] = l(:notice_successful_update) unless request.referer.presence == edit_group_path(@group, :tab => 'users')
+        redirect_back_or_default edit_group_path(@group, tab: 'users'), referer: true
+      end
       format.js
       format.api do
         if @users.any?
@@ -129,10 +132,14 @@ class GroupsController < ApplicationController
     end
   end
 
-  def remove_user
-    @group.users.delete(User.find(params[:user_id])) if request.delete?
+  def remove_users
+    @users = User.in_group(@group).where(:id => (params[:user_id] || params[:user_ids])).to_a
+    @group.users.delete(@users)
     respond_to do |format|
-      format.html {redirect_to edit_group_path(@group, :tab => 'users')}
+      format.html do
+        flash[:notice] = l(:notice_successful_delete) unless request.referer.presence == edit_group_path(@group, :tab => 'users')
+        redirect_back_or_default edit_group_path(@group, tab: 'users'), referer: true
+      end
       format.js
       format.api {render_api_ok}
     end
