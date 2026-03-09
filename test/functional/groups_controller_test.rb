@@ -249,10 +249,10 @@ class GroupsControllerTest < Redmine::ControllerTest
     assert_match /John Smith/, response.body
   end
 
-  def test_remove_user
+  def test_remove_users
     assert_difference 'Group.find(10).users.count', -1 do
       delete(
-        :remove_user,
+        :remove_users,
         :params => {
           :id => 10,
           :user_id => '8'
@@ -261,13 +261,48 @@ class GroupsControllerTest < Redmine::ControllerTest
     end
   end
 
-  def test_xhr_remove_user
+  def test_xhr_remove_users
     assert_difference 'Group.find(10).users.count', -1 do
       delete(
-        :remove_user,
+        :remove_users,
         :params => {
           :id => 10,
           :user_id => '8'
+        },
+        :xhr => true
+      )
+      assert_response :success
+      assert_equal 'text/javascript', response.media_type
+    end
+  end
+
+  def test_remove_users_patch
+    group = Group.find(10)
+    user = User.find(9)
+    group.users << user
+
+    assert_difference 'Group.find(10).users.count', -2 do
+      delete(
+        :remove_users,
+        :params => {
+          :id => 10,
+          :user_ids => ['8', '9']
+        }
+      )
+    end
+  end
+
+  def test_xhr_remove_users_patch
+    group = Group.find(10)
+    user = User.find(9)
+    group.users << user
+
+    assert_difference 'Group.find(10).users.count', -2 do
+      delete(
+        :remove_users,
+        :params => {
+          :id => 10,
+          :user_ids => ['8', '9']
         },
         :xhr => true
       )

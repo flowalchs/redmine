@@ -237,4 +237,40 @@ class Redmine::ApiTest::GroupsTest < Redmine::ApiTest::Base
     end
     assert_not_include User.find(8), group.reload.users
   end
+
+  test "DELETE /groups/:id/users.xml should remove users from the group" do
+    group = Group.generate!
+    group.users << User.find(5)
+    group.users << User.find(6)
+    assert_difference 'group.reload.users.count', -2 do
+      delete(
+        "/groups/#{group.id}/users.xml",
+        :params => {:user_ids => [5, 6]},
+        :headers => credentials('admin')
+      )
+      assert_response :no_content
+      assert_equal '', @response.body
+    end
+    assert_not_include User.find(5), group.reload.users
+    assert_not_include User.find(6), group.reload.users
+  end
+
+  test "DELETE /groups/:id/users.xml removes users and skips unknown user IDs" do
+    group = Group.generate!
+    group.users << User.find(5)
+    group.users << User.find(6)
+    group.users << User.find(7)
+    assert_difference 'group.reload.users.count', -2 do
+      delete(
+        "/groups/#{group.id}/users.xml",
+        :params => {:user_ids => [5, 6, 8]},
+        :headers => credentials('admin')
+      )
+      assert_response :no_content
+      assert_equal '', @response.body
+    end
+    assert_not_include User.find(5), group.reload.users
+    assert_not_include User.find(6), group.reload.users
+    assert_include User.find(7), group.reload.users
+  end
 end

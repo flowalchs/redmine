@@ -314,7 +314,7 @@ class ContextMenusControllerTest < Redmine::ControllerTest
 
   def test_context_menu_should_propose_shared_versions_for_issues_from_different_projects
     @request.session[:user_id] = 2
-    version = Version.create!(:name => 'Shared', :sharing => 'system', :project_id => 1)
+    Version.create!(:name => 'Shared', :sharing => 'system', :project_id => 1)
 
     get(
       :issues,
@@ -520,6 +520,114 @@ class ContextMenusControllerTest < Redmine::ControllerTest
       get :issues, :params => { :ids => [1], :back_url => back_url }
       assert_response :success
       assert_select 'a.icon-del', :count => 0
+    end
+  end
+
+  def test_context_menu_multiple_users_should_show_add_user_to_group_links
+    get :users, params: { ids: [1, 2] }
+    assert_response :success
+
+    assert_select 'a.submenu', text: I18n.t(:label_add_user_to_group), count: 1
+    assert_select 'a.submenu', text: I18n.t(:label_remove_user_from_group), count: 0
+
+    assert_select 'a.icon.icon-lock span.icon-label', text: 'Lock', count: 1
+    assert_select 'a.icon.icon-del span.icon-label', text: 'Delete', count: 1
+
+    assert_select 'li.folder' do |folders|
+      rem_folder = folders.find { |li| li.at_css('> a.submenu')&.text&.strip == I18n.t(:label_add_user_to_group) }
+      assert rem_folder, "a.submenu '#{I18n.t(:label_add_user_to_group)}' not found"
+      if rem_folder
+        assert_select rem_folder, '> ul > li', count: 2
+        assert_select rem_folder, "ul > li > a[rel='nofollow'][data-method='post']", count: 2
+      end
+    end
+  end
+
+  def test_context_menu_multiple_users_should_show_remove_add_user_from_group_links
+    get :users, params: { ids: [1, 8] }
+    assert_response :success
+
+    assert_select 'a.icon.icon-lock span.icon-label', text: 'Lock', count: 1
+    assert_select 'a.icon.icon-del span.icon-label', text: 'Delete', count: 1
+
+    assert_select 'a.submenu', text: I18n.t(:label_add_user_to_group), count: 1
+    assert_select 'a.submenu', text: I18n.t(:label_remove_user_from_group), count: 1
+
+    assert_select 'li.folder' do |folders|
+      rem_folder = folders.find { |li| li.at_css('> a.submenu')&.text&.strip == I18n.t(:label_add_user_to_group) }
+      assert rem_folder, "a.submenu '#{I18n.t(:label_add_user_to_group)}' not found"
+      if rem_folder
+        assert_select rem_folder, '> ul > li', count: 2
+        assert_select rem_folder, "ul > li > a[rel='nofollow'][data-method='post']", count: 2
+      end
+
+      rem_folder = folders.find { |li| li.at_css('> a.submenu')&.text&.strip == I18n.t(:label_remove_user_from_group) }
+      assert rem_folder, "a.submenu '#{I18n.t(:label_remove_user_from_group)}' not found"
+      if rem_folder
+        assert_select rem_folder, '> ul > li', count: 2
+        assert_select rem_folder, "ul > li > a[rel='nofollow'][data-method='delete']", count: 2
+      end
+    end
+  end
+
+  def test_context_menu_single_user_should_show_remove_user_from_group_links
+    get :users, params: { ids: [8] }
+    assert_response :success
+
+    assert_select 'a.submenu', text: I18n.t(:label_remove_user_from_group), count: 1
+    assert_select 'a.submenu', text: I18n.t(:label_add_user_to_group), count: 0
+
+    assert_select 'a.icon.icon-lock span.icon-label', text: 'Lock', count: 1
+    assert_select 'a.icon.icon-edit span.icon-label', text: 'Edit', count: 1
+    assert_select 'a.icon.icon-del span.icon-label', text: 'Delete', count: 1
+
+    assert_select 'li.folder' do |folders|
+      rem_folder = folders.find { |li| li.at_css('> a.submenu')&.text&.strip == I18n.t(:label_remove_user_from_group) }
+      assert rem_folder, "a.submenu '#{I18n.t(:label_remove_user_from_group)}' not found"
+      if rem_folder
+        assert_select rem_folder, '> ul > li', count: 2
+        assert_select rem_folder, "ul > li > a[rel='nofollow'][data-method='delete']", count: 2
+        assert_select rem_folder, 'a[data-confirm]' do |links|
+          value = links.first['data-confirm']
+          assert value.start_with?('Are you sure you want to remove 1 user')
+        end
+      end
+    end
+  end
+
+  def test_context_menu_mulitple_user_should_show_remove_add_user_from_group_links
+    group = Group.find(10)
+    user = User.find(9)
+    group.users << user
+
+    get :users, params: { ids: [8, 9] }
+    assert_response :success
+
+    assert_select 'a.icon.icon-edit span.icon-label', text: 'Edit', count: 0
+    assert_select 'a.icon.icon-lock span.icon-label', text: 'Lock', count: 1
+    assert_select 'a.icon.icon-del span.icon-label', text: 'Delete', count: 1
+
+    assert_select 'a.submenu', text: I18n.t(:label_remove_user_from_group), count: 1
+    assert_select 'a.submenu', text: I18n.t(:label_add_user_to_group), count: 1
+
+    assert_select 'li.folder' do |folders|
+      rem_folder = folders.find { |li| li.at_css('> a.submenu')&.text&.strip == I18n.t(:label_add_user_to_group) }
+      assert rem_folder, "a.submenu '#{I18n.t(:label_add_user_to_group)}' not found"
+      if rem_folder
+        assert_select rem_folder, '> ul > li', count: 1
+        assert_select rem_folder, "ul > li > a[rel='nofollow'][data-method='post']", count: 1
+      end
+
+      rem_folder = folders.find { |li| li.at_css('> a.submenu')&.text&.strip == I18n.t(:label_remove_user_from_group) }
+      assert rem_folder, "a.submenu '#{I18n.t(:label_remove_user_from_group)}' not found"
+      if rem_folder
+        assert_select rem_folder, '> ul > li', count: 2
+        assert_select rem_folder, "ul > li > a[rel='nofollow'][data-method='delete']", count: 2
+        assert_select rem_folder, 'a[data-confirm]' do |links|
+          value = links.first['data-confirm']
+          assert value.start_with?('Are you sure you want to remove 2 users')
+        end
+      end
     end
   end
 end
