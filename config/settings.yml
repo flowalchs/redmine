@@ -373,3 +373,8 @@ wiki_tablesort_enabled:
   default: 0
 reactions_enabled:
   default: 1
+issue_activity_journal_columns:
+  serialized: true
+  default:
+  - status_id
+  - notes

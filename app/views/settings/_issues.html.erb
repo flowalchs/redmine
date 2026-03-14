@@ -81,5 +81,60 @@
   </div>
 </fieldset>
 
+<fieldset class="box" id="notified_events">
+  <legend><%= l(:setting_issue_activity_journal_columns) %></legend>
+  <div class="any-settings" style="margin-top: 12px;">
+    <label>
+      <%= check_box_tag "settings[issue_activity_journal_columns][]",
+            "any:any",
+            Array(Setting.issue_activity_journal_columns).include?("any:any"),
+            id:  "journal_cols_any_any",
+            data: {
+              disables: "input[data-parent-notifiable=issue-activity-columns]"
+            }
+      %>
+      Alle Änderungen
+    </label><br>
+
+    <label class="parent">
+      <%= check_box_tag "settings[issue_activity_journal_columns][]",
+            "cf:any",
+            Array(Setting.issue_activity_journal_columns).include?("cf:any"),
+            id: "journal_cols_cf_any",
+            data: {
+              parent_notifiable: "issue-activity-columns"
+            }
+      %>
+      Alle Custom-Felder
+    </label><br>
+
+    <label class="parent">
+      <%= check_box_tag "settings[issue_activity_journal_columns][]",
+            "relation:any",
+            Array(Setting.issue_activity_journal_columns).include?("relation:any"),
+            id: "journal_cols_relation_any",
+            data: {
+              parent_notifiable: "issue-activity-columns"
+            }
+      %>
+      Alle Relationen
+    </label><br>
+    <div id="list-definition" class="parent">
+        <%= select_tag "settings[issue_activity_journal_columns][]",
+                      options_for_select(all_activity_journal_field_options, Setting.issue_activity_journal_columns),
+                      multiple: true,
+                      size: 10,
+                      class: "multiselect wide",
+                      id: "journal_cols_multiselect",
+                      data: { 
+                        parent_notifiable: "issue-activity-columns"
+                      }
+          %>
+
+        <%= hidden_field_tag "settings[issue_activity_journal_columns][]", "", id: nil %>
+    </div>
+  </div>
+</fieldset>
+
 <%= submit_tag l(:button_save) %>
 <% end %>

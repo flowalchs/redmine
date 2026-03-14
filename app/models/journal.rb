@@ -54,10 +54,27 @@ class Journal < ApplicationRecord
     :author_key => :user_id,
     :scope =>
       proc do
-        preload({:issue => :project}, {:issue => :tracker}, :user).
-          joins("LEFT OUTER JOIN #{JournalDetail.table_name} ON #{JournalDetail.table_name}.journal_id = #{Journal.table_name}.id").
-            where("#{Journal.table_name}.journalized_type = 'Issue' AND" +
-                  " (#{JournalDetail.table_name}.prop_key = 'status_id' OR #{Journal.table_name}.notes <> '')").distinct
+        base = preload({ issue: :project }, { issue: :tracker }, :user)
+                .where("#{Journal.table_name}.journalized_type = 'Issue'")
+        sel = Array(Setting.issue_activity_journal_columns).map(&:to_s).reject(&:blank?)
+
+        # all journal updates on issues
+        return base if sel.include?("any:any")
+
+        clauses, binds = [], []
+
+        # select exist on JournalDetails for property and prop_key
+        %w[attr cf attachment relation].each do |prop|
+          if (sql_arr, b = build_or_for_property(prop, sel)) && sql_arr.present?
+            clauses << sql_arr.map { |c| "(#{c})" }.join(' OR ')
+            binds.concat(b)
+          end
+        end
+        clauses << "#{Journal.table_name}.notes <> ''" if sel.include?('notes')
+        return base if clauses.empty?
+
+        base = base.joins("LEFT OUTER JOIN #{JournalDetail.table_name} ON #{JournalDetail.table_name}.journal_id = #{Journal.table_name}.id").distinct if binds.present?
+        base.where([clauses.join(' OR '), *binds])
       end
   )
   acts_as_mentionable :attributes => ['notes']
@@ -260,6 +277,34 @@ class Journal < ApplicationRecord
         :prop_key  => relation.relation_type_for(journalized),
         key => relation.other_issue(journalized).try(:id)
       )
+  end
+
+  # build OR JournalDetail for property and prop_key, return [sql, binds] or nil
+  def self.build_or_for_property(property, sel)
+    # example-inputs in sel:
+    #   "attr:any", "attr:status_id", "cf:any", "cf:12", "attachment:any", "relation:any", "relation:precedes"
+    keys = sel.grep(/\A#{Regexp.escape(property)}:/)
+              .map { |s| s.split(':', 2).last }
+
+    return nil if keys.empty?
+
+    sqls, binds = [], []
+
+    # 'any': all details of this property
+    if keys.delete('any')
+      sqls  << "#{JournalDetail.table_name}.property = ?"
+      binds << property
+    elsif keys.any?
+      if keys.size == 1
+        sqls  << "(#{JournalDetail.table_name}.property = ? AND #{JournalDetail.table_name}.prop_key = ?)"
+        binds << property << keys.first
+      else
+        sqls  << "(#{JournalDetail.table_name}.property = ? AND #{JournalDetail.table_name}.prop_key IN (?))"
+        binds << property << keys
+      end
+    end
+
+    sqls.empty? ? nil : [sqls, binds]
   end
 
   private

@@ -248,4 +248,31 @@ module SettingsHelper
      ['Retro', 'retro'],
      ['Robohash', 'robohash']]
   end
+
+  # returns all available fields for journals updated in an activity provider
+  def all_activity_journal_field_options
+    attrs = Issue.new.safe_attribute_names
+    options = attrs.filter_map do |attr|
+      label = l("field_#{attr.gsub(/_id$/, '')}", default: nil)
+      [label, "attr:#{attr}"] if label.present?
+    end
+
+    options << [l(:label_subtask_plural), 'attr:child_id']
+    options << [l(:field_parent_issue), 'attr:parent_id']
+    options << [l(:label_attachment_plural), 'attachment:any']
+
+    relation_types = IssueRelation::TYPES.keys  # ["relates", "duplicates", "blocks", ...]
+    relation_types.each do |type|
+      label = l("label_#{type}", default: nil) ||
+              l("label_#{type}_to", default: nil) ||
+              l("label_#{type}_by", default: nil)
+      options << [label, "relation:#{type}"] if label.present?
+    end
+
+    IssueCustomField.all.each do |cf|
+      options << [cf.name, "cf:#{cf.id}"]
+    end
+
+    options
+  end
 end
