@@ -378,11 +378,10 @@ class Journal < ApplicationRecord
         (
           Setting.notified_events.include?('issue_updated') ||
           (Setting.notified_events.include?('issue_note_added') && notes.present?) ||
-          (Setting.notified_events.include?('issue_status_updated') && new_status.present?) ||
-          (Setting.notified_events.include?('issue_assigned_to_updated') && detail_for_attribute('assigned_to_id').present?) ||
-          (Setting.notified_events.include?('issue_priority_updated') && new_value_for('priority_id').present?) ||
-          (Setting.notified_events.include?('issue_fixed_version_updated') && detail_for_attribute('fixed_version_id').present?) ||
-          (Setting.notified_events.include?('issue_attachment_added') && details.any? {|d| d.property == 'attachment' && d.value })
+          (Setting.notified_events.include?('issue_attachment_added') && details.any? {|d| d.property == 'attachment' && d.value }) ||
+          notify_by_details?(Setting.notified_events.include?('issue_attr_updated'), 'attr', Setting.notified_event_issue_attr_updated_details) ||
+          notify_by_details?(Setting.notified_events.include?('issue_relation_updated'), 'relation', Setting.notified_event_issue_relation_updated_details) ||
+          notify_by_details?(Setting.notified_events.include?('issue_cf_updated'), 'cf', Setting.notified_event_issue_cf_updated_details)
         )
       Mailer.deliver_issue_edit(self)
     end
@@ -393,5 +392,18 @@ class Journal < ApplicationRecord
       notified = notified.select {|user| user.allowed_to?(:view_private_notes, journalized.project)}
     end
     notified
+  end
+
+  def notify_by_details?(notify_all, property, prop_keys)
+    return false unless notify_all || prop_keys.present?
+
+    relevant_details = details.select { |d| d.property == property }
+    return false if relevant_details.empty?
+    return true if notify_all
+
+    allowed = Array(prop_keys).map(&:to_s)
+    relevant_details.any? do |detail|
+      allowed.include?(detail.prop_key.to_s)
+    end
   end
 end

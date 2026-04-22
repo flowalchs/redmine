@@ -122,15 +122,17 @@ module SettingsHelper
 
   # Renders a notification field for a Redmine::Notifiable option
   def notification_field(notifiable)
+    checked = setting_value('notified_events').include?(notifiable.name)
     tag_data =
       if notifiable.parent.present?
-        {:parent_notifiable => notifiable.parent}
+        {:parent_notifiable => notifiable.parent,
+         :disables => "fieldset[data-parent-notifiable=#{notifiable.name}]"}
       else
         {:disables => "input[data-parent-notifiable=#{notifiable.name}]"}
       end
     tag = check_box_tag('settings[notified_events][]',
                         notifiable.name,
-                        setting_value('notified_events').include?(notifiable.name),
+                        checked,
                         :id => nil,
                         :data => tag_data)
     text = l_or_humanize(notifiable.name, :prefix => 'label_')
@@ -138,7 +140,13 @@ module SettingsHelper
     if notifiable.parent.present?
       options[:class] = "parent"
     end
-    content_tag(:label, tag + text, options)
+    label = content_tag(:label, tag + text, options)
+
+    if detailed_notifiable?(notifiable)
+      label + notification_details_fieldset(notifiable, checked)
+    else
+      label + "<br />".html_safe
+    end
   end
 
   def session_lifetime_options
@@ -247,5 +255,72 @@ module SettingsHelper
      ['Wavatars', 'wavatar'],
      ['Retro', 'retro'],
      ['Robohash', 'robohash']]
+  end
+
+  def issue_attribute_options(except: [])
+    attrs = Issue.new.safe_attribute_names
+    options = attrs.filter_map do |attr|
+      next if except.include?(attr)
+
+      label = l("field_#{attr.gsub(/_id$/, '')}", default: nil)
+      [label, attr] if label.present?
+    end
+    options << [l(:label_subtask_plural), 'child_id']
+    options << [l(:field_parent_issue), 'parent_id']
+    options.sort_by(&:first)
+  end
+
+  def issue_custom_field_options
+    IssueCustomField
+      .sorted
+      .map { |cf| [cf.name, cf.id.to_s] }
+  end
+
+  def issue_relation_options
+    IssueRelation::TYPES.map do |name, _|
+      [l("label_relation_#{name}", default: nil) ||
+       l("label_#{name}_to", default: nil) ||
+       l("label_#{name}_by", default: nil) ||
+       l("label_#{name}", default: nil) || name, name]
+    end
+  end
+
+  def notification_details_fieldset(notifiable, checked)
+    notifiable_setting_key = "notified_event_#{notifiable.name}_details"
+    content_tag(
+      :fieldset,
+      class: 'notification-details',
+      disabled: checked,
+      data: { parent_notifiable: notifiable.name }
+    ) do
+      select_tag(
+        "settings[#{notifiable_setting_key}][]",
+        options_for_select(
+          notifiable_field_options(notifiable),
+          setting_value(notifiable_setting_key)
+        ),
+        multiple: true,
+        size: 6,
+        class: 'multiselect wide'
+      ) +
+      hidden_field_tag("settings[#{notifiable_setting_key}][]", "", id: nil)
+    end
+  end
+
+  def notifiable_field_options(notifiable)
+    case notifiable.name
+    when 'issue_attr_updated'
+      issue_attribute_options(except: %w[notes])
+    when 'issue_relation_updated'
+      issue_relation_options
+    when 'issue_cf_updated'
+      issue_custom_field_options
+    else
+      []
+    end
+  end
+
+  def detailed_notifiable?(notifiable)
+    notifiable_field_options(notifiable).present?
   end
 end

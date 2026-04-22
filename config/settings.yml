@@ -203,6 +203,15 @@ notified_events:
   default:
   - issue_added
   - issue_updated
+notified_event_issue_attr_updated_details:
+  serialized: true
+  default: []
+notified_event_issue_relation_updated_details:
+  serialized: true
+  default: []
+notified_event_issue_cf_updated_details:
+  serialized: true
+  default: []
 mail_handler_body_delimiters:
   default: ''
 mail_handler_enable_regex_delimiters:

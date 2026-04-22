@@ -1344,6 +1344,7 @@ input#months { inline-size: 46px; }
 
 fieldset.settings label { display: block; }
 fieldset#notified_events .parent { padding-inline-start: 20px; }
+fieldset#notified_events .notification-details { padding-inline-start: 40px; border: 0px;}
 
 span.required {color: var(--oc-red-9);}
 .summary {font-style: italic;}
