@@ -929,8 +929,6 @@ en-GB:
   label_bulk_edit_selected_time_entries: Bulk edit selected time entries
   text_time_entries_destroy_confirmation: Are you sure you want to delete the selected time entr(y/ies)?
   label_issue_note_added: Note added
-  label_issue_status_updated: Status updated
-  label_issue_priority_updated: Priority updated
   label_issues_visibility_own: Issues created by or assigned to the user
   field_issues_visibility: Issues visibility
   label_issues_visibility_all: All issues
@@ -1089,7 +1087,6 @@ en-GB:
     users
   label_custom_field_select_type: Select the type of object to which the custom field
     is to be attached
-  label_issue_assigned_to_updated: Assignee updated
   label_check_for_updates: Check for updates
   label_latest_compatible_version: Latest compatible version
   label_unknown_plugin: Unknown plugin
@@ -1292,7 +1289,6 @@ en-GB:
   text_characters_must_contain: Must contain %{character_classes}.
   label_starts_with: starts with
   label_ends_with: ends with
-  label_issue_fixed_version_updated: Target version updated
   setting_project_list_defaults: Projects list defaults
   label_display_type: Display results as
   label_display_type_list: List
@@ -1563,3 +1559,6 @@ en-GB:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

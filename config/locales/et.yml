@@ -498,8 +498,6 @@ et:
   label_issue_added: "Teema lisatud"
   label_issue_updated: "Teema uuendatud"
   label_issue_note_added: "Märkus lisatud"
-  label_issue_status_updated: "Olek uuendatud"
-  label_issue_priority_updated: "Prioriteet uuendatud"
   label_document: "Dokument"
   label_document_new: "Uus dokument"
   label_document_plural: "Dokumendid"
@@ -1089,7 +1087,6 @@ et:
   setting_force_default_language_for_anonymous: "Anonüümsed kasutajad on vaikimisi keelega"
   setting_force_default_language_for_loggedin: "Sisse logitud kasutajad on vaikimisi keelega"
   label_custom_field_select_type: "Vali objekti tüüp, millele omaloodud väli külge pannakse"
-  label_issue_assigned_to_updated: "Tegeleja uuendatud"
   label_check_for_updates: "Vaata uuendusi"
   label_latest_compatible_version: "Värskeim ühilduv versioon"
   label_unknown_plugin: "Tundmatu plugin"
@@ -1296,7 +1293,6 @@ et:
   text_characters_must_contain: Must contain %{character_classes}.
   label_starts_with: starts with
   label_ends_with: ends with
-  label_issue_fixed_version_updated: Target version updated
   setting_project_list_defaults: Projects list defaults
   label_display_type: Display results as
   label_display_type_list: List
@@ -1567,3 +1563,6 @@ et:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

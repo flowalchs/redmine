@@ -647,10 +647,6 @@ bg:
   label_issue_added: Добавена задача
   label_issue_updated: Обновена задача
   label_issue_note_added: Добавена бележка
-  label_issue_status_updated: Обновено състояние
-  label_issue_assigned_to_updated: Задачата е с назначен нов изпълнител
-  label_issue_priority_updated: Обновен приоритет
-  label_issue_fixed_version_updated: Променена версия
   label_issue_attachment_added: Добавен файл
   label_document: Документ
   label_document_new: Нов документ
@@ -1503,3 +1499,6 @@ bg:
     other: "%{count} други"
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

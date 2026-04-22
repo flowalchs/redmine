@@ -365,8 +365,6 @@ pt-BR:
   label_issue_added: Tarefa adicionada
   label_issue_updated: Tarefa atualizada
   label_issue_note_added: Nota adicionada
-  label_issue_status_updated: Situação atualizada
-  label_issue_priority_updated: Prioridade atualizada
   label_document: Documento
   label_document_new: Novo documento
   label_document_plural: Documentos
@@ -1102,7 +1100,6 @@ pt-BR:
     logados
   label_custom_field_select_type: Selecione o tipo de objeto ao qual o campo personalizado
     é para ser anexado
-  label_issue_assigned_to_updated: Atribuição atualizada
   label_check_for_updates: Verificar atualizações
   label_latest_compatible_version: Última versão compatível
   label_unknown_plugin: Plugin desconhecido
@@ -1297,7 +1294,6 @@ pt-BR:
   text_characters_must_contain: Precisa conter %{character_classes}.
   label_starts_with: começando com
   label_ends_with: terminando com
-  label_issue_fixed_version_updated: Versão atualizada
   setting_project_list_defaults: Padrão da lista de projetos
   label_display_type: Exibir resultados como
   label_display_type_list: Lista
@@ -1567,3 +1563,6 @@ pt-BR:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

@@ -927,8 +927,6 @@ ta-IN:
   label_bulk_edit_selected_time_entries: தேர்ந்தெடுக்கப்பட்ட நேர உள்ளீடுகளை மொத்தமாக திருத்தவும்
   text_time_entries_destroy_confirmation: தேர்ந்தெடுக்கப்பட்ட நேரத்தை (y / ies) நீக்க விரும்புகிறீர்களா?
   label_issue_note_added: குறிப்பு சேர்க்கப்பட்டது
-  label_issue_status_updated: நிலை புதுப்பிக்கப்பட்டது
-  label_issue_priority_updated: முன்னுரிமை புதுப்பிக்கப்பட்டது
   label_issues_visibility_own: பயனரால் உருவாக்கப்பட்ட அல்லது ஒதுக்கப்பட்ட சிக்கல்கள்
   field_issues_visibility: சிக்கல்கள் தெரிவுநிலை
   label_issues_visibility_all: அனைத்து சிக்கல்களும்
@@ -1087,7 +1085,6 @@ ta-IN:
     பயனர்கள்
   label_custom_field_select_type: தனிப்பயன் புலம் எந்த பொருளின் வகையைத் தேர்ந்தெடுக்கவும்
     இணைக்கப்பட வேண்டும்
-  label_issue_assigned_to_updated: நியமிக்கப்பட்ட மேம்படுத்தப்பட்டது
   label_check_for_updates: புதுப்பிப்புகளைச் சரிபார்க்கவும்
   label_latest_compatible_version: சமீபத்திய இணக்கமான பதிப்பு
   label_unknown_plugin: தெரியாத சொருகி
@@ -1289,7 +1286,6 @@ ta-IN:
   text_characters_must_contain: கொண்டிருக்க வேண்டும் %{character_classes}.
   label_starts_with:  தொடங்குகிறது
   label_ends_with:  உடன் முடிகிறது
-  label_issue_fixed_version_updated: இலக்கு பதிப்பு புதுப்பிக்கப்பட்டது
   setting_project_list_defaults: திட்டங்கள் பட்டியல் இயல்புநிலை
   label_display_type: முடிவுகளைக் காண்பி
   label_display_type_list: பட்டியல்
@@ -1517,3 +1513,6 @@ ta-IN:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

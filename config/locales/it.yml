@@ -658,10 +658,6 @@ it:
   label_issue_added: Segnalazioni aggiunte
   label_issue_updated: Segnalazioni aggiornate
   label_issue_note_added: Nota aggiunta
-  label_issue_status_updated: Stato aggiornato
-  label_issue_assigned_to_updated: Assegnatario aggiornato
-  label_issue_priority_updated: Priorità aggiornata
-  label_issue_fixed_version_updated: Versione prevista aggiornata
   label_issue_attachment_added: File aggiunto
   label_document: Documento
   label_document_new: Nuovo documento
@@ -1501,3 +1497,6 @@ it:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

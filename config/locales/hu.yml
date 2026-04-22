@@ -938,8 +938,6 @@
   label_role_anonymous: Anonim
   label_role_non_member: Nem tag
   label_issue_note_added: Jegyzet hozzáadva
-  label_issue_status_updated: Állapot módosítva
-  label_issue_priority_updated: Prioritás módosítva
   label_issues_visibility_own: A felhasználó által létrehozott vagy hozzárendelt feladatok
   field_issues_visibility: Feladatok láthatósága
   label_issues_visibility_all: Minden feladat
@@ -1091,7 +1089,6 @@
   setting_force_default_language_for_anonymous: Névtelen felhasználók nem válthatnak nyelvet
   setting_force_default_language_for_loggedin: Belépett felhasználók nem válthatnak nyelvet
   label_custom_field_select_type: Válassza ki, milyen típusú objektumhoz kapcsolódjon a mező
-  label_issue_assigned_to_updated: Felelős módosítva
   label_check_for_updates: Frissítések keresése
   label_latest_compatible_version: Legutóbbi kompatibilis verzió
   label_unknown_plugin: Ismeretlen bővítmény
@@ -1280,7 +1277,6 @@
   text_characters_must_contain: "Megkövetelt karakterek: %{character_classes}."
   label_starts_with: kezdete
   label_ends_with: vége
-  label_issue_fixed_version_updated: Célverzió módosítva
   setting_project_list_defaults: Projektlista alapértelmezései
   label_display_type: Eredmény megjelenítése
   label_display_type_list: táblázatként
@@ -1497,3 +1493,6 @@
   label_user_mail_option_only_my_watches: Csak a figyelt dolgaimról
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

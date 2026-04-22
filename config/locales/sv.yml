@@ -545,8 +545,6 @@ sv:
   label_issue_added: Ärende tillagt
   label_issue_updated: Ärende uppdaterat
   label_issue_note_added: Anteckning tillagd
-  label_issue_status_updated: Status uppdaterad
-  label_issue_priority_updated: Prioritet uppdaterad
   label_document: Dokument
   label_document_new: Nytt dokument
   label_document_plural: Dokument
@@ -1114,7 +1112,6 @@ sv:
   setting_force_default_language_for_anonymous: Lås till förvalt språk för anonyma användare
   setting_force_default_language_for_loggedin: Lås till förvalt språk för inloggade användare
   label_custom_field_select_type: Välj den typ av objekt som det anpassade fältet skall användas för
-  label_issue_assigned_to_updated: Tilldelning har uppdaterats
   label_check_for_updates: Leta efter uppdateringar
   label_latest_compatible_version: Senaste kompatibla version
   label_unknown_plugin: Okänt tillägg
@@ -1304,7 +1301,6 @@ sv:
   text_characters_must_contain: Måste innehålla %{character_classes}.
   label_starts_with: börjar på
   label_ends_with: slutar på
-  label_issue_fixed_version_updated: Målversion uppdaterad
   setting_project_list_defaults: Projektlista standardinställningar
   label_display_type: Visa resultat som
   label_display_type_list: Lista
@@ -1526,3 +1522,6 @@ sv:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

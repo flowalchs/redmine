@@ -923,8 +923,6 @@ ca:
   label_role_anonymous: "Anònim"
   label_role_non_member: "No membre"
   label_issue_note_added: "Nota afegida"
-  label_issue_status_updated: "Estat actualitzat"
-  label_issue_priority_updated: "Prioritat actualitzada"
   label_issues_visibility_own: "Peticions creades per l'usuari o assignades a ell"
   field_issues_visibility: "Visibilitat de les peticions"
   label_issues_visibility_all: "Totes les peticions"
@@ -1079,7 +1077,6 @@ ca:
   setting_force_default_language_for_anonymous: "Forçar llenguatge per defecte als usuaris anònims."
   setting_force_default_language_for_loggedin: "Forçar llenguatge per defecte als usuaris identificats."
   label_custom_field_select_type: "Seleccioni el tipus d'objecte al qual vol posar el camp personalitzat"
-  label_issue_assigned_to_updated: "Persona assignada actualitzada"
   label_check_for_updates: "Comprovar actualitzacions"
   label_latest_compatible_version: "Ultima versió compatible"
   label_unknown_plugin: "Complement desconegut"
@@ -1280,7 +1277,6 @@ ca:
   text_characters_must_contain: Ha de tenir %{character_classes}.
   label_starts_with: comença amb
   label_ends_with: acaba amb
-  label_issue_fixed_version_updated: Versió de destí al dia
   setting_project_list_defaults: Llista per defecte dels Projectes
   label_display_type: Mostrar resultats en
   label_display_type_list: Llista
@@ -1549,3 +1545,6 @@ ca:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

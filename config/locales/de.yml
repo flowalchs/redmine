@@ -590,18 +590,15 @@ de:
   label_internal: Intern
   label_issue: Ticket
   label_issue_added: Ticket hinzugefügt
-  label_issue_assigned_to_updated: Bearbeiter aktualisiert
   label_issue_category: Ticket-Kategorie
   label_issue_category_new: Neue Kategorie
   label_issue_category_plural: Ticket-Kategorien
   label_issue_new: Neues Ticket
   label_issue_note_added: Notiz hinzugefügt
   label_issue_plural: Tickets
-  label_issue_priority_updated: Priorität aktualisiert
   label_issue_status: Ticket-Status
   label_issue_status_new: Neuer Status
   label_issue_status_plural: Ticket-Status
-  label_issue_status_updated: Status aktualisiert
   label_issue_tracking: Tickets
   label_issue_updated: Ticket aktualisiert
   label_issue_view_all: Alle Tickets anzeigen
@@ -1316,7 +1313,6 @@ de:
   text_characters_must_contain: Muss enthalten %{character_classes}.
   label_starts_with: beginnt mit
   label_ends_with: endet mit
-  label_issue_fixed_version_updated: Zielversion aktualisiert
   setting_project_list_defaults: Voreinstellungen Projektliste
   label_display_type: Ergebnisse anzeigen als
   label_display_type_list: Liste
@@ -1518,3 +1514,6 @@ de:
   label_open_in_full_view: Open in full view
   text_pandoc_available: Pandoc available (optional)
   label_user_mail_option_only_my_watches: Only for things I watch
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

@@ -972,8 +972,6 @@ vi:
   label_role_anonymous: Ẩn danh
   label_role_non_member: Không là thành viên
   label_issue_note_added: Ghi chú được thêm
-  label_issue_status_updated: Trạng thái cập nhật
-  label_issue_priority_updated: Cập nhật ưu tiên
   label_issues_visibility_own: Vấn đề tạo bởi hoặc gán cho người dùng
   field_issues_visibility: Vấn đề được nhìn thấy
   label_issues_visibility_all: Tất cả vấn đề
@@ -1129,7 +1127,6 @@ vi:
   setting_force_default_language_for_anonymous: Bắt buộc ngôn ngữ mặc định cho người dùng ẩn danh
   setting_force_default_language_for_loggedin: Bắt buộc ngôn ngữ mặc định cho người dùng đã đăng nhập
   label_custom_field_select_type: Chọn loại đối tượng mà trường tùy chỉnh được đính kèm
-  label_issue_assigned_to_updated: Đã cập nhật người được gán
   label_check_for_updates: Kiểm tra cập nhật
   label_latest_compatible_version: Phiên bản tương thích mới nhất
   label_unknown_plugin: Plugin không xác định
@@ -1318,7 +1315,6 @@ vi:
   text_characters_must_contain: Cần phải chứa %{character_classes}.
   label_starts_with: bắt đầu với
   label_ends_with: kết thúc bằng
-  label_issue_fixed_version_updated: Đã cập nhật phiên bản đích
   setting_project_list_defaults: Danh sách dự án mặc định
   label_display_type: Hiển thị kết quả dưới dạng
   label_display_type_list: Danh sách
@@ -1566,3 +1562,6 @@ vi:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

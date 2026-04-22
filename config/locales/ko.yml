@@ -963,8 +963,6 @@ ko:
   label_role_non_member: 비회원
 
   label_issue_note_added: "댓글이 추가되었습니다."
-  label_issue_status_updated: "상태가 변경되었습니다."
-  label_issue_priority_updated: "우선 순위가 변경되었습니다."
   label_issues_visibility_own: "일감을 생성하거나 맡은 사용자"
   field_issues_visibility: "일감 보임"
   label_issues_visibility_all: "모든 일감"
@@ -1119,7 +1117,6 @@ ko:
   setting_force_default_language_for_anonymous: 익명 사용자의 기본 언어 강제
   setting_force_default_language_for_loggedin: 로그인 사용자의 기본 언어 강제
   label_custom_field_select_type: 사용자 정의 필드에 추가할 대상을 선택해주세요.
-  label_issue_assigned_to_updated: 담당자 업데이트
   label_check_for_updates: 업데이트 확인
   label_latest_compatible_version: 최종 호환 버전
   label_unknown_plugin: 알 수 없는 플러그인
@@ -1308,7 +1305,6 @@ ko:
   text_characters_must_contain: "%{character_classes}가 포함되어야 합니다."
   label_starts_with: 앞문자 일치
   label_ends_with: 뒷문자 일치
-  label_issue_fixed_version_updated: 버전 변경
   setting_project_list_defaults: 프로젝트 기본표시 목록
   label_display_type: 결과 표시
   label_display_type_list: 목록
@@ -1579,3 +1575,6 @@ ko:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

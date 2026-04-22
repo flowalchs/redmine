@@ -935,8 +935,6 @@ gl:
   label_role_anonymous: "Anónimo"
   label_role_non_member: "Non membro"
   label_issue_note_added: "Engadiuse a nota."
-  label_issue_status_updated: "Actualizouse o estado."
-  label_issue_priority_updated: "Actualizouse a prioridade."
   label_issues_visibility_own: "Peticións creadas polo usuario ou asignadas a el"
   field_issues_visibility: "Visibilidade das peticións"
   label_issues_visibility_all: "Todas as peticións"
@@ -1091,7 +1089,6 @@ gl:
   setting_force_default_language_for_anonymous: "Definir un idioma predeterminado para os usuarios anónimos."
   setting_force_default_language_for_loggedin: "Definir un idioma predeterminado para os usuarios rexistrados."
   label_custom_field_select_type: "Seleccionar o tipo de obxecto ao que se anexará o campo personalizado."
-  label_issue_assigned_to_updated: "Actualizouse o asignado."
   label_check_for_updates: "Comprobar se hai actualizacións"
   label_latest_compatible_version: "Última versión compatíbel"
   label_unknown_plugin: "Complemento descoñecido"
@@ -1299,7 +1296,6 @@ gl:
   text_characters_must_contain: Debe conter %{character_classes}.
   label_starts_with: comeza con
   label_ends_with: finaliza con
-  label_issue_fixed_version_updated: Versión destino actualizada
   setting_project_list_defaults: Listaxes por defecto dos proxectos
   label_display_type: Amosar os resultados coma
   label_display_type_list: Listaxe
@@ -1568,3 +1564,6 @@ gl:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

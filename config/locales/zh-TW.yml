@@ -648,9 +648,6 @@
   label_issue_added: 議題已新增
   label_issue_updated: 議題已更新
   label_issue_note_added: 筆記已新增
-  label_issue_status_updated: 狀態已更新
-  label_issue_assigned_to_updated: 被分派者已更新
-  label_issue_priority_updated: 優先權已更新
   label_document: 文件
   label_document_new: 建立新文件
   label_document_plural: 文件
@@ -1344,7 +1341,6 @@
   text_characters_must_contain: 必須包含 %{character_classes}.
   label_starts_with: 開頭是
   label_ends_with: 結尾是
-  label_issue_fixed_version_updated: 目標版本已更新
   setting_project_list_defaults: 專案清單預設值
   label_display_type: 篩選結果顯示為
   label_display_type_list: 清單
@@ -1573,3 +1569,6 @@
   label_user_mail_option_only_my_watches: 只提醒我監看中的事物
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

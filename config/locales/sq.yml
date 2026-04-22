@@ -605,10 +605,6 @@ sq:
   label_issue_added: U shtua çështje
   label_issue_updated: U përditësua çështje
   label_issue_note_added: U shtua shënim
-  label_issue_status_updated: U përditësua gjendja
-  label_issue_assigned_to_updated: U përditësua i caktuari
-  label_issue_priority_updated: U përditësua përparësia
-  label_issue_fixed_version_updated: U përditësua versioni i synuar
   label_document: Dokument
   label_document_new: Dokument i ri
   label_document_plural: Dokumente
@@ -1524,3 +1520,6 @@ sq:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

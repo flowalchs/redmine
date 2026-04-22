@@ -1023,8 +1023,6 @@ ru:
   label_role_anonymous: Аноним
   label_role_non_member: Не участник проекта
   label_issue_note_added: Примечание добавлено
-  label_issue_status_updated: Статус обновлён
-  label_issue_priority_updated: Приоритет обновлён
   label_issues_visibility_own: Задачи созданные или назначенные пользователю
   field_issues_visibility: Видимость задач
   label_issues_visibility_all: Все задачи
@@ -1182,7 +1180,6 @@ ru:
   setting_force_default_language_for_anonymous: Не определять язык для анонимных пользователей
   setting_force_default_language_for_loggedin: Не определять язык для зарегистрированных пользователей
   label_custom_field_select_type: Выберите тип объекта для которого будет создано настраиваемое поле
-  label_issue_assigned_to_updated: Исполнитель обновлен
   label_check_for_updates: Проверить обновления
   label_latest_compatible_version: Последняя совместимая версия
   label_unknown_plugin: Неизвестный плагин
@@ -1376,7 +1373,6 @@ ru:
   text_characters_must_contain: Должен содержать %{character_classes}.
   label_starts_with: начинается с
   label_ends_with: заканчивается на
-  label_issue_fixed_version_updated: Версии обновлены
   setting_project_list_defaults: Опции списка проектов по умолчанию
   label_display_type: Отображать как
   label_display_type_list: Список
@@ -1629,3 +1625,6 @@ ru:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

@@ -547,9 +547,6 @@ lt:
   label_issue_added: Darbas pridėtas
   label_issue_updated: Darbas atnaujintas
   label_issue_note_added: Pastaba pridėta
-  label_issue_status_updated: Statusas atnaujintas
-  label_issue_assigned_to_updated: Paskirtasis atnaujintas
-  label_issue_priority_updated: Prioritetas atnaujintas
   label_document: Dokumentas
   label_document_new: Naujas dokumentas
   label_document_plural: Dokumentai
@@ -1274,7 +1271,6 @@ lt:
   text_characters_must_contain: Privalo būti %{character_classes}.
   label_starts_with: prasideda
   label_ends_with: baigiasi
-  label_issue_fixed_version_updated: Tikslinė versija atnaujinta
   setting_project_list_defaults: Projektų sąrašo numatytosios reikšmės
   label_display_type: Rodyti įrašus kaip
   label_display_type_list: Sąrašas
@@ -1523,3 +1519,6 @@ lt:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

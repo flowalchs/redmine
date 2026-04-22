@@ -924,8 +924,6 @@ zh:
   label_role_anonymous: 匿名用户
   label_role_non_member: 非成员用户
   label_issue_note_added: 问题备注已添加
-  label_issue_status_updated: 问题状态更新
-  label_issue_priority_updated: 问题优先级更新
   label_issues_visibility_own: 用户创建或被指派的问题
   field_issues_visibility: 问题可见度
   label_issues_visibility_all: 全部问题
@@ -1080,7 +1078,6 @@ zh:
   setting_force_default_language_for_anonymous: 强制匿名用户使用默认语言
   setting_force_default_language_for_loggedin: 强制已登录用户使用默认语言
   label_custom_field_select_type: 请选择需要关联自定义属性的类型
-  label_issue_assigned_to_updated: 指派人已更新
   label_check_for_updates: 检查更新
   label_latest_compatible_version: 最新兼容版本
   label_unknown_plugin: 未知插件
@@ -1269,7 +1266,6 @@ zh:
   text_characters_must_contain: 必须包含字符 %{character_classes}。
   label_starts_with: 开始于
   label_ends_with: 结束于
-  label_issue_fixed_version_updated: 更新目标版本
   setting_project_list_defaults: 项目列表默认值
   label_display_type: 显示结果到
   label_display_type_list: 列表
@@ -1498,3 +1494,6 @@ zh:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

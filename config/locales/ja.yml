@@ -978,8 +978,6 @@ ja:
   label_role_non_member: 非メンバー
 
   label_issue_note_added: コメントの追加
-  label_issue_status_updated: ステータスの更新
-  label_issue_priority_updated: 優先度の更新
   label_issues_visibility_own: 作成者か担当者であるチケット
   field_issues_visibility: 表示できるチケット
   label_issues_visibility_all: すべてのチケット
@@ -1114,7 +1112,6 @@ ja:
   setting_force_default_language_for_anonymous: 匿名ユーザーにデフォルトの言語を強制
   setting_force_default_language_for_loggedin: ログインユーザーにデフォルトの言語を強制
   label_custom_field_select_type: カスタムフィールドを追加するオブジェクトを選択してください
-  label_issue_assigned_to_updated: 担当者の更新
   label_check_for_updates: アップデートを確認
   label_latest_compatible_version: 互換性のある最新バージョン
   label_unknown_plugin: 不明なプラグイン
@@ -1298,7 +1295,6 @@ ja:
   text_characters_must_contain: "%{character_classes}を含む必要があります。"
   label_starts_with: 前方一致
   label_ends_with: 後方一致
-  label_issue_fixed_version_updated: 対象バージョンの更新
   setting_project_list_defaults: プロジェクトの一覧で表示する項目
   label_display_type: 表示形式
   label_display_type_list: リスト
@@ -1503,3 +1499,6 @@ ja:
   button_remove: 解除
   label_open_in_full_view: 全画面で表示
   label_user_mail_option_only_my_watches: ウォッチ中のもの
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

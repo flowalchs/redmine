@@ -964,8 +964,6 @@ es-PA:
   label_role_anonymous: Anónimo
   label_role_non_member: No miembro
   label_issue_note_added: Nota añadida
-  label_issue_status_updated: Estado actualizado
-  label_issue_priority_updated: Prioridad actualizada
   label_issues_visibility_own: Incidencias creadas por el usuario o asignadas a él
   field_issues_visibility: Visibilidad de las incidencias
   label_issues_visibility_all: Todas las incidencias
@@ -1119,7 +1117,6 @@ es-PA:
   setting_force_default_language_for_anonymous: Forzar lenguaje por defecto a usuarios anónimos
   setting_force_default_language_for_loggedin: Forzar lenguaje por defecto para usuarios identificados
   label_custom_field_select_type: Seleccione el tipo de objeto al que unir el campo personalizado
-  label_issue_assigned_to_updated: Persona asignada actualizada
   label_check_for_updates: Comprobar actualizaciones
   label_latest_compatible_version: Útima versión compatible
   label_unknown_plugin: Plugin desconocido
@@ -1322,7 +1319,6 @@ es-PA:
   text_characters_must_contain: Must contain %{character_classes}.
   label_starts_with: starts with
   label_ends_with: ends with
-  label_issue_fixed_version_updated: Target version updated
   setting_project_list_defaults: Projects list defaults
   label_display_type: Display results as
   label_display_type_list: List
@@ -1593,3 +1589,6 @@ es-PA:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated

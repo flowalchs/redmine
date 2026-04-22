@@ -923,8 +923,6 @@ cs:
   label_role_anonymous: Anonymní
   label_role_non_member: Není členem
   label_issue_note_added: Přidána poznámka
-  label_issue_status_updated: Aktualizován stav
-  label_issue_priority_updated: Aktualizována priorita
   label_issues_visibility_own: Úkol vytvořen nebo přiřazen uživatel(i/em)
   field_issues_visibility: Viditelnost úkolů
   label_issues_visibility_all: Všechny úkoly
@@ -1082,7 +1080,6 @@ cs:
   setting_force_default_language_for_loggedin: Vynutit výchozí jazyk pro přihlášené
     uživatele
   label_custom_field_select_type: Vybrat typ objektu, ke kterému bude přiřazeno uživatelské pole
-  label_issue_assigned_to_updated: Přiřazený uživatel aktualizován
   label_check_for_updates: Zkontroluj aktualizace
   label_latest_compatible_version: Poslední kompatibilní verze
   label_unknown_plugin: Nezámý plugin
@@ -1280,7 +1277,6 @@ cs:
   text_characters_must_contain: Musí obsahovat %{character_classes}.
   label_starts_with: začíná
   label_ends_with: končí
-  label_issue_fixed_version_updated: Cílová verze aktualizována
   setting_project_list_defaults: Výchozí nastavení seznamu projektů
   label_display_type: Zobrazit výsledky jako
   label_display_type_list: Seznam
@@ -1543,3 +1539,6 @@ cs:
   label_user_mail_option_only_my_watches: Only for things I watch
   label_last_used_on: 'Last used: %{value} ago'
   label_never_used: Never used
+  label_issue_attr_updated: Attributes updated
+  label_issue_relation_updated: Relations updated
+  label_issue_cf_updated: Custom fields updated
