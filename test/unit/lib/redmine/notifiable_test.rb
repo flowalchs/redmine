@@ -24,8 +24,8 @@ class Redmine::NotifiableTest < ActiveSupport::TestCase
   end
 
   def test_all
-    %w(issue_added issue_updated issue_note_added issue_status_updated
-       issue_assigned_to_updated issue_priority_updated issue_fixed_version_updated issue_attachment_added news_added
+    %w(issue_added issue_updated issue_note_added issue_attachment_added
+       issue_attr_updated issue_relation_updated issue_cf_updated news_added
        news_comment_added document_added file_added
        message_posted
        wiki_content_added wiki_content_updated).each do |notifiable|

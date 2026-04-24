@@ -84,94 +84,131 @@ class JournalObserverTest < ActiveSupport::TestCase
     assert_equal 0, ActionMailer::Base.deliveries.size
   end
 
-  def test_create_should_send_email_notification_with_issue_status_updated
+  def test_create_should_send_email_notification_with_issue_attr_updated_details_status
     issue = Issue.first
     user = User.first
     issue.init_journal(user)
     issue.status = IssueStatus.last
 
-    with_settings :notified_events => %w(issue_status_updated) do
+    with_settings(:notified_events => [], :notified_event_issue_attr_updated_details => %w(status_id)) do
       assert issue.save
     end
     assert_equal 2, ActionMailer::Base.deliveries.size
   end
 
-  def test_create_should_not_send_email_notification_without_issue_status_updated
+  def test_create_should_send_email_notification_with_issue_attr_updated
     issue = Issue.first
     user = User.first
     issue.init_journal(user)
     issue.status = IssueStatus.last
 
-    with_settings :notified_events => [] do
+    with_settings(:notified_events => %w(issue_attr_updated), :notified_event_issue_attr_updated_details => []) do
+      assert issue.save
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+  def test_create_should_not_send_email_notification_without_issue_attr_updated_details_status
+    issue = Issue.first
+    user = User.first
+    issue.init_journal(user)
+    issue.status = IssueStatus.last
+
+    with_settings(:notified_events => [], :notified_event_issue_attr_updated_details => []) do
       assert issue.save
     end
     assert_equal 0, ActionMailer::Base.deliveries.size
   end
 
-  def test_create_without_status_update_should_not_send_email_notification_with_issue_status_updated
+  def test_create_without_status_update_should_not_send_email_notification_with_issue_attr_updated_details_status
     issue = Issue.first
     user = User.first
     issue.init_journal(user)
     issue.subject = "No status update"
 
-    with_settings :notified_events => %w(issue_status_updated) do
+    with_settings(:notified_events => [], :notified_event_issue_attr_updated_details => %w(status_id)) do
       assert issue.save
     end
     assert_equal 0, ActionMailer::Base.deliveries.size
   end
 
-  def test_create_should_send_email_notification_with_issue_assignee_updated
+  def test_create_should_send_email_notification_with_issue_attr_updated_details_assignee
     issue = Issue.generate!(:assigned_to_id => 2)
     ActionMailer::Base.deliveries.clear
     user = User.first
     issue.init_journal(user)
     issue.assigned_to = User.find(3)
 
-    with_settings :notified_events => %w(issue_assigned_to_updated) do
+    with_settings(:notified_events => [], :notified_event_issue_attr_updated_details => %w(assigned_to_id)) do
       assert issue.save
     end
     assert_equal 2, ActionMailer::Base.deliveries.size
   end
 
-  def test_create_should_not_send_email_notification_without_issue_assignee_updated
+  def test_create_should_send_email_notification_with_issue_attr_updated_assignee
     issue = Issue.generate!(:assigned_to_id => 2)
     ActionMailer::Base.deliveries.clear
     user = User.first
     issue.init_journal(user)
     issue.assigned_to = User.find(3)
 
-    with_settings :notified_events => [] do
-      assert issue.save
-    end
-    assert_equal 0, ActionMailer::Base.deliveries.size
-  end
-
-  def test_create_should_send_email_notification_with_issue_priority_updated
-    issue = Issue.first
-    user = User.first
-    issue.init_journal(user)
-    issue.priority = IssuePriority.last
-
-    with_settings :notified_events => %w(issue_priority_updated) do
+    with_settings(:notified_events => %w(issue_attr_updated), :notified_event_issue_attr_updated_details => []) do
       assert issue.save
     end
     assert_equal 2, ActionMailer::Base.deliveries.size
   end
 
-  def test_create_should_not_send_email_notification_without_issue_priority_updated
-    issue = Issue.first
+  def test_create_should_not_send_email_notification_without_issue_attr_updated_details_assignee
+    issue = Issue.generate!(:assigned_to_id => 2)
+    ActionMailer::Base.deliveries.clear
     user = User.first
     issue.init_journal(user)
-    issue.priority = IssuePriority.last
+    issue.assigned_to = User.find(3)
 
-    with_settings :notified_events => [] do
+    with_settings(:notified_events => [], :notified_event_issue_attr_updated_details => []) do
       assert issue.save
     end
     assert_equal 0, ActionMailer::Base.deliveries.size
   end
 
-  def test_create_should_send_email_notification_with_issue_fixed_version_updated
-    with_settings :notified_events => %w(issue_fixed_version_updated) do
+  def test_create_should_send_email_notification_with_issue_attr_updated_details_priority
+    issue = Issue.first
+    user = User.first
+    issue.init_journal(user)
+    issue.priority = IssuePriority.last
+
+    with_settings(:notified_events => [], :notified_event_issue_attr_updated_details => %w(priority_id)) do
+      assert issue.save
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+  def test_create_should_send_email_notification_with_issue_attr_updated_priority
+    issue = Issue.first
+    user = User.first
+    issue.init_journal(user)
+    issue.priority = IssuePriority.last
+
+    with_settings(:notified_events => %w(issue_attr_updated), :notified_event_issue_attr_updated_details => []) do
+      assert issue.save
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+  def test_create_should_not_send_email_notification_without_issue_attr_updated_details_priority
+    issue = Issue.first
+    user = User.first
+    issue.init_journal(user)
+    issue.priority = IssuePriority.last
+
+    with_settings(:notified_events => [], :notified_event_issue_attr_updated_details => []) do
+      assert issue.save
+    end
+    assert_equal 0, ActionMailer::Base.deliveries.size
+  end
+
+  def test_create_should_send_email_notification_with_issue_attr_updated_details_fixed_version
+    with_settings(:notified_events => [], :notified_event_issue_attr_updated_details => %w(fixed_version_id)) do
       user = User.find_by_login('jsmith')
       issue = issues(:issues_001)
       issue.init_journal(user)
@@ -182,8 +219,20 @@ class JournalObserverTest < ActiveSupport::TestCase
     end
   end
 
-  def test_create_should_not_send_email_notification_without_issue_fixed_version_updated
-    with_settings :notified_events => [] do
+  def test_create_should_send_email_notification_with_issue_attr_updated_fixed_version
+    with_settings(:notified_events  => %w(issue_attr_updated), :notified_event_issue_attr_updated_details => []) do
+      user = User.find_by_login('jsmith')
+      issue = issues(:issues_001)
+      issue.init_journal(user)
+      issue.fixed_version = versions(:versions_003)
+
+      assert issue.save
+      assert_equal 2, ActionMailer::Base.deliveries.size
+    end
+  end
+
+  def test_create_should_not_send_email_notification_without_issue_attr_updated_details_fixed_version
+    with_settings(:notified_events => [], :notified_event_issue_attr_updated_details => []) do
       user = User.find_by_login('jsmith')
       issue = issues(:issues_001)
       issue.init_journal(user)
@@ -222,5 +271,152 @@ class JournalObserverTest < ActiveSupport::TestCase
       assert issue.save
       assert_equal 0, ActionMailer::Base.deliveries.size
     end
+  end
+
+  def test_notify_on_issue_relation_updated_with_selected_relation_type
+    issue = Issue.first
+    other_issue = Issue.generate!(:assigned_to_id => 2)
+    user = User.first
+    issue.init_journal(user)
+
+    with_settings(notified_events: [], notified_event_issue_relation_updated_details: %w(relates)) do
+      IssueRelation.create!(
+        issue_from: issue,
+        issue_to: other_issue,
+        relation_type: 'relates'
+      )
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+  def test_notify_on_issue_relation_updated_when_event_enabled
+    issue = Issue.first
+    other_issue = Issue.generate!(:assigned_to_id => 2)
+    user = User.first
+    issue.init_journal(user)
+
+    with_settings(:notified_events => %w(issue_relation_updated), :notified_event_issue_attr_updated_details => []) do
+      IssueRelation.create!(
+        issue_from: issue,
+        issue_to: other_issue,
+        relation_type: 'relates'
+      )
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+  def test_do_not_notify_on_issue_relation_updated_with_unselected_relation_type
+    issue = Issue.first
+    other_issue = Issue.generate!(:assigned_to_id => 2)
+    user = User.first
+    issue.init_journal(user)
+
+    with_settings(notified_events: [], notified_event_issue_relation_updated_details: %w(blocks follows)) do
+      IssueRelation.create!(
+        issue_from: issue,
+        issue_to: other_issue,
+        relation_type: 'relates'
+      )
+    end
+    assert_equal 0, ActionMailer::Base.deliveries.size
+  end
+
+  def test_notify_on_issue_relation_updated_with_selected_relation_type_follows
+    issue = Issue.first
+    other_issue = Issue.generate!(:assigned_to_id => 2)
+    user = User.first
+    issue.init_journal(user)
+
+    with_settings(notified_events: [], notified_event_issue_relation_updated_details: %w(blocks follows)) do
+      IssueRelation.create!(
+        issue_from: issue,
+        issue_to: other_issue,
+        relation_type: 'follows'
+      )
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+  def test_notify_on_issue_custom_field_updated_with_selected_custom_field
+    issue = Issue.first
+    user  = User.first
+    cf = IssueCustomField.find_by!(field_format: 'string')
+    issue.init_journal(user)
+    issue.custom_field_values = { cf.id => 'New value' }
+
+    with_settings(:notified_events => [], :notified_event_issue_cf_updated_details => [cf.id.to_s]) do
+      assert issue.save
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+  def test_notify_on_issue_custom_field_updated_when_event_enabled
+    issue = Issue.first
+    user  = User.first
+    cf = IssueCustomField.find_by!(field_format: 'string')
+    issue.init_journal(user)
+    issue.custom_field_values = { cf.id => 'Changed value' }
+
+    with_settings(notified_events: %w(issue_cf_updated), notified_event_issue_cf_updated_details: []) do
+      assert issue.save
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+  def test_do_not_notify_on_issue_custom_field_updated_with_unselected_custom_field
+    issue = Issue.first
+    user  = User.first
+    cf1 = IssueCustomField.find_by!(field_format: 'string')
+    cf2 = IssueCustomField.create!(
+      name: 'Second CF',
+      field_format: 'string',
+      is_for_all: true,
+      trackers: Tracker.all
+    )
+    issue.init_journal(user)
+    issue.custom_field_values = { cf2.id => 'Ignored value' }
+
+    with_settings(notified_events: [], notified_event_issue_cf_updated_details: [cf1.id.to_s]) do
+      assert issue.save
+    end
+    assert_equal 0, ActionMailer::Base.deliveries.size
+  end
+
+  def test_notify_on_issue_custom_field_updated_with_other_selected_custom_field
+    issue = Issue.first
+    user  = User.first
+    cf1 = IssueCustomField.find_by!(field_format: 'string')
+    cf2 = IssueCustomField.create!(
+      name: 'Second CF',
+      field_format: 'string',
+      is_for_all: true,
+      trackers: Tracker.all
+    )
+    issue.init_journal(user)
+    issue.custom_field_values = { cf2.id => 'Relevant value' }
+
+    with_settings(notified_events: [], notified_event_issue_cf_updated_details: [cf2.id.to_s]) do
+      assert issue.save
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+  def test_notify_on_issue_custom_field_updated_with_multiple_selected_custom_fields
+    issue = Issue.first
+    user  = User.first
+    cf1 = IssueCustomField.find_by!(field_format: 'string')
+    cf2 = IssueCustomField.create!(
+      name: 'Second CF',
+      field_format: 'string',
+      is_for_all: true,
+      trackers: Tracker.all
+    )
+    issue.init_journal(user)
+    issue.custom_field_values = { cf2.id => 'Matching value' }
+
+    with_settings(notified_events: [], notified_event_issue_cf_updated_details: [cf1.id.to_s, cf2.id.to_s]) do
+      assert issue.save
+    end
+    assert_equal 2, ActionMailer::Base.deliveries.size
   end
 end

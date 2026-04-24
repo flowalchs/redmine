@@ -80,6 +80,57 @@ class SettingsControllerTest < Redmine::ControllerTest
     assert_equal 'Test footer', Setting.emails_footer
   end
 
+  def test_get_notifications_settings_with_issue_cf_updated_details
+    with_settings(:notified_events => %w(issue_attr_updated), :notified_event_issue_cf_updated_details => ['2', '6']) do
+      get :edit, params: { tab: 'notifications' }
+    end
+    assert_response :success
+    assert_select 'input[type=checkbox][name="settings[notified_events][]"][value="issue_attr_updated"]'
+    assert_select 'input[type=checkbox][value="issue_cf_updated"]:not([checked])', 1
+    assert_select 'input[type=hidden][name="settings[notified_event_issue_cf_updated_details][]"]'
+    assert_select 'select[name="settings[notified_event_issue_cf_updated_details][]"]' do
+      assert_select 'option[selected=selected][value="2"]'
+      assert_select 'option[selected=selected][value="6"]'
+    end
+  end
+
+  def test_get_notifications_settings_displays_issue_update_detail_controls
+    get :edit, params: { tab: 'notifications' }
+    assert_response :success
+
+    assert_select 'input[type=checkbox][name="settings[notified_events][]"][value="issue_attr_updated"]'
+    assert_select 'input[type=checkbox][name="settings[notified_events][]"][value="issue_relation_updated"]'
+    assert_select 'input[type=checkbox][name="settings[notified_events][]"][value="issue_cf_updated"]'
+
+    assert_select 'input[type=checkbox][value="issue_attr_updated"]:not([checked])'
+    assert_select 'input[type=checkbox][value="issue_relation_updated"]:not([checked])'
+    assert_select 'input[type=checkbox][value="issue_cf_updated"]:not([checked])'
+
+    assert_select 'select[name="settings[notified_event_issue_attr_updated_details][]"]'
+    assert_select 'input[type=hidden][name="settings[notified_event_issue_attr_updated_details][]"]'
+    assert_select 'select[name="settings[notified_event_issue_attr_updated_details][]"] option', minimum: 8
+    assert_select 'option[value="status_id"]'
+    assert_select 'option[value="priority_id"]'
+    assert_select 'option[value="assigned_to_id"]'
+    assert_select 'option[value="subject"]'
+    assert_select 'select[name="settings[notified_event_issue_attr_updated_details][]"] option[selected]', 0
+
+    assert_select 'select[name="settings[notified_event_issue_relation_updated_details][]"]'
+    assert_select 'input[type=hidden][name="settings[notified_event_issue_relation_updated_details][]"]'
+    assert_select 'select[name="settings[notified_event_issue_relation_updated_details][]"] option', minimum: 6
+    assert_select 'option[value="relates"]'
+    assert_select 'option[value="blocks"]'
+    assert_select 'option[value="follows"]'
+    assert_select 'select[name="settings[notified_event_issue_relation_updated_details][]"] option[selected]', 0
+
+    assert_select 'select[name="settings[notified_event_issue_cf_updated_details][]"]'
+    assert_select 'input[type=hidden][name="settings[notified_event_issue_cf_updated_details][]"]'
+    assert_select 'select[name="settings[notified_event_issue_cf_updated_details][]"] option', minimum: 1
+    assert_select 'select[name="settings[notified_event_issue_cf_updated_details][]"] option[value]'
+    assert_select 'select[name="settings[notified_event_issue_cf_updated_details][]"] option', /Database|Searchable|Custom/i
+    assert_select 'select[name="settings[notified_event_issue_cf_updated_details][]"] option[selected]', 0
+  end
+
   def test_edit_commit_update_keywords
     with_settings :commit_update_keywords => [
       {"keywords" => "fixes, resolves", "status_id" => "3"},
