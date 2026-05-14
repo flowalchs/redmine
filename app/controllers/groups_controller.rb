@@ -117,7 +117,10 @@ class GroupsController < ApplicationController
     @users = User.not_in_group(@group).where(:id => (params[:user_id] || params[:user_ids])).to_a
     @group.users << @users
     respond_to do |format|
-      format.html {redirect_back_or_default edit_group_path(@group, :tab => 'users')}
+      format.html do
+        flash[:notice] = l(:notice_successful_update)
+        redirect_back_or_default edit_group_path(@group, :tab => 'users')
+      end
       format.js
       format.api do
         if @users.any?
