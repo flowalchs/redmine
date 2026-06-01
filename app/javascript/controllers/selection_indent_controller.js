@@ -1,8 +1,7 @@
 import { Controller } from '@hotwired/stimulus'
 
 export default class extends Controller {
-  #bulletPattern = /^\s*[*+\-] /
-  #orderedPattern = /^\s*\d+[.)] /
+  #spaces = 2
 
   run(event) {
     const format = event.params.textFormatting
@@ -17,35 +16,29 @@ export default class extends Controller {
     const endPos = end === -1 ? value.length : end
     const selectedText = value.slice(start, endPos)
     const lines = selectedText.split("\n")
-    const spaces = this.#indentSize(lines.find(l => this.#indentSize(l)) || "")
-    if (!spaces) return
 
     event.preventDefault()
 
     const newLines = event.shiftKey
-      ? lines.map(line => this.#unindentLine(line, spaces))
-      : lines.map(line => this.#indentLine(line, spaces))
+      ? lines.map(line => this.#unindentLine(line))
+      : lines.map(line => this.#indentLine(line))
 
     const newText = newLines.join("\n")
 
     input.setRangeText(newText, start, endPos, "preserve")
+    input.setSelectionRange(
+      Math.max(start, selectionStart + newLines[0].length - lines[0].length),
+      selectionEnd + newText.length - selectedText.length
+    )
   }
 
-  #indentSize(line) {
-    if (this.#bulletPattern.test(line)) return 2
-    if (this.#orderedPattern.test(line)) return 4
-    return 0
+  #indentLine(line) {
+    return " ".repeat(this.#spaces) + line
   }
 
-  #indentLine(line, spaces) {
-    if (!this.#indentSize(line)) return line
-    return " ".repeat(spaces) + line
-  }
-
-  #unindentLine(line, spaces) {
+  #unindentLine(line) {
     const currentIndent = line.match(/^(\s*)/)[1].length
-    const remove = Math.min(spaces, currentIndent)
+    const remove = Math.min(this.#spaces, currentIndent)
     return line.slice(remove)
   }
-
 }
