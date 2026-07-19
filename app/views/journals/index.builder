@@ -10,11 +10,11 @@ xml.feed "xmlns" => "http://www.w3.org/2005/Atom" do
   xml.updated((@journals.first ? @journals.first.event_datetime : Time.now).xmlschema)
   xml.author  {xml.name "#{Setting.app_title}"}
   @journals.each do |change|
-    issue = change.issue
+    journalized = change.journalized
     xml.entry do
-      xml.title   "#{issue.project.name} - #{issue.tracker.name} ##{issue.id}: #{issue.subject}"
-      xml.link    "rel" => "alternate", "href" => issue_url(issue)
-      xml.id      issue_url(issue, :journal_id => change)
+      xml.title   journalized.journal_event_title(change)
+      xml.link    "rel" => "alternate", "href" => issue_url(journalized)
+      xml.id      issue_url(journalized, :journal_id => change)
       xml.updated change.created_on.xmlschema
       xml.author do
         xml.name change.user.name

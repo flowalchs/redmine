@@ -944,7 +944,7 @@ class MailHandlerTest < ActiveSupport::TestCase
     assert_equal Issue.find(2), journal.journalized
     assert_match /This is reply/, journal.notes
     assert_equal false, journal.private_notes
-    assert_equal 'Feature request', journal.issue.tracker.name
+    assert_equal 'Feature request', journal.journalized.tracker.name
   end
 
   def test_update_issue_should_accept_issue_id_after_space_inside_brackets
@@ -977,11 +977,11 @@ class MailHandlerTest < ActiveSupport::TestCase
                                                'start_date', 'due_date',
                                                'float field'])
     assert journal.is_a?(Journal)
-    issue = Issue.find(journal.issue.id)
+    issue = Issue.find(journal.journalized.id)
     assert_equal User.find_by_login('jsmith'), journal.user
     assert_equal Issue.find(2), journal.journalized
     assert_match /This is reply/, journal.notes
-    assert_equal 'Feature request', journal.issue.tracker.name
+    assert_equal 'Feature request', journal.journalized.tracker.name
     assert_equal IssueStatus.find_by_name("Resolved"), issue.status
     assert_equal '2010-01-01', issue.start_date.to_s
     assert_equal '2010-12-31', issue.due_date.to_s
@@ -1042,8 +1042,8 @@ class MailHandlerTest < ActiveSupport::TestCase
       )
     assert journal.is_a?(Journal)
     assert_match /This is reply/, journal.notes
-    assert_equal 'Feature request', journal.issue.tracker.name
-    assert_equal 'Normal', journal.issue.priority.name
+    assert_equal 'Feature request', journal.journalized.tracker.name
+    assert_equal 'Normal', journal.journalized.priority.name
   end
 
   def test_update_issue_should_add_cc_as_watchers

@@ -477,13 +477,13 @@ class IssueQuery < Query
   # Returns the journals
   # Valid options are :order, :offset, :limit
   def journals(options={})
-    Journal.visible.
-      joins(:issue => [:project, :status]).
+    Issue.journal_visibility_scope(
+      Journal.visible.where(journalized_type: 'Issue')).
       where(statement).
       order(options[:order]).
       limit(options[:limit]).
       offset(options[:offset]).
-      preload(:details, :user, {:issue => [:project, :author, :tracker, :status]}).
+      preload(:details, :user, {:journalized => [:project, :author, :tracker, :status]}).
       to_a
   rescue ::ActiveRecord::StatementInvalid => e
     raise StatementInvalid.new(e.message)

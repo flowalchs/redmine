@@ -26,7 +26,7 @@ class JournalTest < ActiveSupport::TestCase
   end
 
   def test_journalized_is_an_issue
-    issue = @journal.issue
+    issue = @journal.journalized
     assert_kind_of Issue, issue
     assert_equal 1, issue.id
   end
@@ -181,7 +181,7 @@ class JournalTest < ActiveSupport::TestCase
     # Anonymous user should see issues of public projects only
     journals = Journal.visible(User.anonymous).to_a
     assert journals.any?
-    assert_nil journals.detect {|journal| !journal.issue.project.is_public?}
+    assert_nil journals.detect {|journal| !journal.project.is_public?}
     # Anonymous user should not see issues without permission
     Role.anonymous.remove_permission!(:view_issues)
     journals = Journal.visible(User.anonymous).to_a
@@ -194,7 +194,7 @@ class JournalTest < ActiveSupport::TestCase
     # Non member user should see issues of public projects only
     journals = Journal.visible(user).to_a
     assert journals.any?
-    assert_nil journals.detect {|journal| !journal.issue.project.is_public?}
+    assert_nil journals.detect {|journal| !journal.project.is_public?}
     # Non member user should not see issues without permission
     Role.non_member.remove_permission!(:view_issues)
     user.reload
@@ -205,7 +205,7 @@ class JournalTest < ActiveSupport::TestCase
     user.reload
     journals = Journal.visible(user).to_a
     assert journals.any?
-    assert_nil journals.detect {|journal| journal.issue.project_id != 1}
+    assert_nil journals.detect {|journal| journal.journalized.project_id != 1}
   end
 
   def test_visible_scope_for_admin
@@ -215,7 +215,7 @@ class JournalTest < ActiveSupport::TestCase
     journals = Journal.visible(user).to_a
     assert journals.any?
     # Admin should see issues on private projects that admin does not belong to
-    assert journals.detect {|journal| !journal.issue.project.is_public?}
+    assert journals.detect {|journal| !journal.project.is_public?}
   end
 
   def test_preload_journals_details_custom_fields_should_set_custom_field_instance_variable
@@ -268,7 +268,7 @@ class JournalTest < ActiveSupport::TestCase
     visible_issue = Issue.generate!
     hidden_issue = Issue.generate!(:is_private => true)
 
-    journal = Journal.new
+    journal = Journal.new(journalized: issue)
     journal.details << JournalDetail.new(:property => 'relation', :prop_key => 'relates', :value => visible_issue.id)
     journal.details << JournalDetail.new(:property => 'relation', :prop_key => 'relates', :value => hidden_issue.id)
 

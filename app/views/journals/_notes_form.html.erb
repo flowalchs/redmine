@@ -18,4 +18,4 @@
     <p><%= submit_tag l(:button_save) %>
     <%= link_to l(:button_cancel), '#', :onclick => "$('#journal-#{@journal.id}-form').remove(); $('#journal-#{@journal.id}-notes').show(); return false;" %></p>
 <% end %>
-<%= wikitoolbar_for "journal_#{@journal.id}_notes", preview_issue_path(:project_id => @project, :issue_id => @journal.issue) %>
+<%= wikitoolbar_for "journal_#{@journal.id}_notes", preview_issue_path(:project_id => @project, :issue_id => @journal.journalized) %>

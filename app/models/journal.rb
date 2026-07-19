@@ -21,44 +21,43 @@ class Journal < ApplicationRecord
   include Redmine::SafeAttributes
   include Redmine::Reaction::Reactable
 
-  belongs_to :journalized, :polymorphic => true
-  # added as a quick fix to allow eager loading of the polymorphic association
-  # since always associated to an issue, for now
-  belongs_to :issue, :foreign_key => :journalized_id
-
+  belongs_to :journalized, :polymorphic => true, :inverse_of => :journals
   belongs_to :user
   belongs_to :updated_by, :class_name => 'User'
+
   has_many :details, :class_name => "JournalDetail", :dependent => :delete_all, :inverse_of => :journal
   attr_accessor :indice
 
+  cattr_accessor :journalized_types
+
+  def self.register_journalized_type(klass)
+    self.journalized_types ||= []
+    self.journalized_types << klass unless journalized_types.include?(klass)
+  end
+
+  def self.activity_scope_for(klass)
+    scope = where(journalized_type: klass.name)
+    scope = scope.preload(*klass.journal_activity_preload)
+    klass.journal_activity_scope(scope)
+  end
+
+  def self.register_activity_provider(klass)
+    return if klass.journal_activity_type.blank?
+
+    acts_as_activity_provider(
+      type: klass.journal_activity_type,
+      author_key: :user_id,
+      scope: proc { activity_scope_for(klass) }
+    )
+  end
+
   acts_as_event(
-    :title =>
-       Proc.new do |o|
-         status = ((s = o.new_status) ? " (#{s})" : nil)
-         "#{o.issue.tracker} ##{o.issue.id}#{status}: #{o.issue.subject}"
-       end,
-    :description => :notes,
-    :author => :user,
-    :group => :issue,
-    :type =>
-      Proc.new do |o|
-        (s = o.new_status) ? (s.is_closed? ? 'issue-closed' : 'issue-edit') : 'issue-note'
-      end,
-    :url =>
-      Proc.new do |o|
-        {:controller => 'issues', :action => 'show', :id => o.issue.id, :anchor => "change-#{o.id}"}
-      end
-  )
-  acts_as_activity_provider(
-    :type => 'issues',
-    :author_key => :user_id,
-    :scope =>
-      proc do
-        preload({:issue => :project}, {:issue => :tracker}, :user).
-          joins("LEFT OUTER JOIN #{JournalDetail.table_name} ON #{JournalDetail.table_name}.journal_id = #{Journal.table_name}.id").
-            where("#{Journal.table_name}.journalized_type = 'Issue' AND" +
-                  " (#{JournalDetail.table_name}.prop_key = 'status_id' OR #{Journal.table_name}.notes <> '')").distinct
-      end
+    title: proc {|o|  o.journalized.journal_event_title(o) },
+    description: :notes,
+    author: :user,
+    group: :journalized,
+    type: proc {|o| o.journalized.journal_event_type(o) },
+    url: proc {|o| o.journalized.journal_event_url(o) }
   )
   acts_as_mentionable :attributes => ['notes']
   before_create :split_private_notes
@@ -68,10 +67,16 @@ class Journal < ApplicationRecord
   scope :visible, (lambda do |*args|
     user = args.shift || User.current
     options = args.shift || {}
+    visible_scope = none
 
-    joins(:issue => :project).
-      where(Issue.visible_condition(user, options)).
-      where(Journal.visible_notes_condition(user, :skip_pre_condition => true))
+    journalized_types.each do |klass|
+      relation = where(journalized_type: klass.name)
+      relation = klass.journal_visibility_scope(relation)
+      relation = relation.where(journalized_id: klass.journal_visible_scope(user, options).select(:id))
+      relation = klass.journal_notes_visibility_scope(relation, user, options)
+      visible_scope = visible_scope.or(relation)
+    end
+    visible_scope
   end)
 
   safe_attributes(
@@ -79,7 +84,7 @@ class Journal < ApplicationRecord
     :if => lambda {|journal, user| journal.new_record? || journal.editable_by?(user)})
   safe_attributes(
     'private_notes',
-    :if => lambda {|journal, user| user.allowed_to?(:set_notes_private, journal.project)})
+    :if => lambda {|journal, user| journal.journalized.journal_private_notes_allowed?(user)})
   safe_attributes 'updated_by'
 
   # Returns a SQL condition to filter out journals with notes that are not visible to user
@@ -109,22 +114,13 @@ class Journal < ApplicationRecord
     notes.blank? && details.empty?
   end
 
-  def journalized
-    if journalized_type == 'Issue' && association(:issue).loaded?
-      # Avoid extra query by using preloaded association
-      issue
-    else
-      super
-    end
-  end
-
   # Returns journal details that are visible to user
   def visible_details(user=User.current)
     details.select do |detail|
       if detail.property == 'cf'
         detail.custom_field && detail.custom_field.visible_by?(project, user)
       elsif detail.property == 'relation'
-        Issue.find_by_id(detail.value || detail.old_value).try(:visible?, user)
+        journalized.journal_relation_visible?(detail, user)
       else
         true
       end
@@ -137,10 +133,8 @@ class Journal < ApplicationRecord
     details.detect {|detail| detail.prop_key == attribute}
   end
 
-  # Returns the new status if the journal contains a status change, otherwise nil
   def new_status
-    s = new_value_for('status_id')
-    s ? IssueStatus.find_by_id(s.to_i) : nil
+    journalized.journal_new_status(self)
   end
 
   def new_value_for(prop)
@@ -148,11 +142,11 @@ class Journal < ApplicationRecord
   end
 
   def editable_by?(usr)
-    usr && usr.logged? && (usr.allowed_to?(:edit_issue_notes, project) || (self.user == usr && usr.allowed_to?(:edit_own_issue_notes, project)))
+    journalized.journal_editable_by?(self, usr)
   end
 
   def project
-    journalized.respond_to?(:project) ? journalized.project : nil
+    journalized.journal_project
   end
 
   def attachments
@@ -163,7 +157,7 @@ class Journal < ApplicationRecord
   end
 
   def visible?(*)
-    journalized.visible?(*)
+    journalized.journal_visible?(*)
   end
 
   def attachments_visible?
@@ -188,9 +182,9 @@ class Journal < ApplicationRecord
   end
 
   def notified_users
-    notified = journalized.notified_users
+    notified = journalized.journal_notified_users
     if private_notes?
-      notified = notified.select {|user| user.allowed_to?(:view_private_notes, journalized.project)}
+      notified = select_journal_visible_user(notified)
     end
     notified
   end
@@ -200,7 +194,7 @@ class Journal < ApplicationRecord
   end
 
   def notified_watchers
-    notified = journalized.notified_watchers
+    notified = journalized.journal_notified_watchers
     select_journal_visible_user(notified)
   end
 
@@ -262,6 +256,10 @@ class Journal < ApplicationRecord
         :prop_key  => relation.relation_type_for(journalized),
         key => relation.other_issue(journalized).try(:id)
       )
+  end
+
+  def valid_watcher?(user)
+    journalized.journal_valid_watcher?(user)
   end
 
   private
@@ -354,45 +352,16 @@ class Journal < ApplicationRecord
   end
 
   def add_watcher
-    if user.is_a?(User) &&
-       user.pref.auto_watch_on?('issue_contributed_to') &&
-       valid_watcher?(user)
-      journalized.set_watcher(user, true)
-    end
-
-    assignee = journalized.assigned_to
-    if assignee.is_a?(User) &&
-       assignee.pref.auto_watch_on?('issue_assigned_to_me') &&
-       valid_watcher?(assignee)
-      journalized.set_watcher(assignee, true)
-    end
-  end
-
-  def valid_watcher?(user)
-    user.active? &&
-      user.allowed_to?(:add_issue_watchers, journalized.project) &&
-      journalized.valid_watcher?(user) &&
-      !journalized.watched_by?(user)
+    journalized.journal_process_watchers(self)
   end
 
   def send_notification
-    if notify? &&
-        (
-          Setting.notified_events.include?('issue_updated') ||
-          (Setting.notified_events.include?('issue_note_added') && notes.present?) ||
-          (Setting.notified_events.include?('issue_status_updated') && new_status.present?) ||
-          (Setting.notified_events.include?('issue_assigned_to_updated') && detail_for_attribute('assigned_to_id').present?) ||
-          (Setting.notified_events.include?('issue_priority_updated') && new_value_for('priority_id').present?) ||
-          (Setting.notified_events.include?('issue_fixed_version_updated') && detail_for_attribute('fixed_version_id').present?) ||
-          (Setting.notified_events.include?('issue_attachment_added') && details.any? {|d| d.property == 'attachment' && d.value })
-        )
-      Mailer.deliver_issue_edit(self)
-    end
+    journalized.journal_notify(self)
   end
 
   def select_journal_visible_user(notified)
     if private_notes?
-      notified = notified.select {|user| user.allowed_to?(:view_private_notes, journalized.project)}
+      notified = notified.select {|user| journalized.journal_user_can_view_private_notes?(user)}
     end
     notified
   end
