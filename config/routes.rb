@@ -328,6 +328,7 @@ Rails.application.routes.draw do
   get 'attachments/download/:id/:filename', :to => 'attachments#download', :id => /\d+/, :filename => /.*/, :as => 'download_named_attachment', :format => 'html'
   get 'attachments/download/:id', :to => 'attachments#download', :id => /\d+/
   get 'attachments/thumbnail/:id(/:size)', :to => 'attachments#thumbnail', :id => /\d+/, :size => /\d+/, :as => 'thumbnail'
+  get 'attachments/markdownized_previews/:id/*path', :to => 'attachments#preview_media', :id => /\d+/, :format => false
   resources :attachments, :only => [:show, :update, :destroy]
 
   # register plugin object types with ObjectTypeConstraint.register_object_type(PluginModel.name.underscore.pluralize')

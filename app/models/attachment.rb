@@ -297,9 +297,7 @@ class Attachment < ApplicationRecord
   end
 
   def self.clear_markdownized_previews
-    Dir.glob(File.join(markdownized_previews_storage_path, "*.md")).each do |file|
-      File.delete file
-    end
+    FileUtils.rm_rf(Dir.glob(File.join(markdownized_previews_storage_path, '*')))
   end
 
   def is_text?
@@ -342,7 +340,7 @@ class Attachment < ApplicationRecord
     return nil unless markdownized_previewable?
 
     target = markdownized_preview_cache_path
-    if Redmine::Markdownizer.convert(diskfile, target)
+    if Redmine::Markdownizer.convert(diskfile, target, id)
       File.read(target, :mode => "rb")
     end
   rescue => e
@@ -355,8 +353,22 @@ class Attachment < ApplicationRecord
     nil
   end
 
+  def preview_media(path)
+    base_path = File.expand_path(File.join(self.class.markdownized_previews_storage_path, id.to_s))
+    file_path = File.expand_path(path, base_path)
+
+    return nil unless file_path.start_with?(base_path)
+    return nil unless File.file?(file_path)
+
+    file_path
+  end
+
+  def markdownized_preview_directory
+    File.join(self.class.markdownized_previews_storage_path, id.to_s)
+  end
+
   def markdownized_preview_cache_path
-    File.join(self.class.markdownized_previews_storage_path, "#{digest}_#{filesize}.md")
+    File.join(markdownized_preview_directory, "preview.md")
   end
 
   def previewable?
@@ -590,7 +602,7 @@ class Attachment < ApplicationRecord
     Dir[thumbnail_path("*")].each do |thumb|
       File.delete(thumb)
     end
-    FileUtils.rm_f(markdownized_preview_cache_path)
+    FileUtils.rm_rf(markdownized_preview_directory)
   end
 
   def thumbnail_path(size)

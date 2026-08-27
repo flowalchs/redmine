@@ -31,6 +31,8 @@ class RoutingAttachmentsTest < Redmine::RoutingTest
     should_route 'GET /attachments/thumbnail/1' => 'attachments#thumbnail', :id => '1'
     should_route 'GET /attachments/thumbnail/1/200' => 'attachments#thumbnail', :id => '1', :size => '200'
 
+    should_route 'GET /attachments/markdownized_previews/1/pictures/image.png' => 'attachments#preview_media', :id => '1', :path => 'pictures/image.png'
+
     should_route 'DELETE /attachments/1' => 'attachments#destroy', :id => '1'
 
     should_route 'GET /attachments/issues/1/edit' => 'attachments#edit_all', :object_type => 'issues', :object_id => '1'

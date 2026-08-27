@@ -287,6 +287,15 @@ class AttachmentsControllerTest < Redmine::ControllerTest
     assert_equal 'text/html', @response.media_type
     assert_select 'div.filecontent.wiki', :text => /Redmine is a flexible project management web application/
     assert_select '.nodata', :count => 0
+    assert_select 'div.filecontent.wiki img', 1
+    img = css_select('div.filecontent.wiki img').first
+    assert_match(%r{markdownized_previews/#{a.id}/}, img['src'])
+    path = img['src'][%r{markdownized_previews/#{a.id}/(.+)$}, 1]
+
+    get(:preview_media, :params => {:id => a.id, :path => path})
+
+    assert_response :success
+    assert_equal 'image/png', response.media_type
   end
 
   def test_show_libreoffice_writer
@@ -309,6 +318,66 @@ class AttachmentsControllerTest < Redmine::ControllerTest
     assert_equal 'text/html', @response.media_type
     assert_select 'div.filecontent.wiki', :text => /Redmine is a flexible project management web application/
     assert_select '.nodata', :count => 0
+    assert_select 'div.filecontent.wiki img', 1
+    img = css_select('div.filecontent.wiki img').first
+    assert_match(%r{markdownized_previews/#{a.id}/}, img['src'])
+    path = img['src'][%r{markdownized_previews/#{a.id}/(.+)$}, 1]
+
+    get(:preview_media, :params => {:id => a.id, :path => path})
+
+    assert_response :success
+    assert_equal 'image/png', response.media_type
+  end
+
+  def test_preview_media_from_private_issue_without_permission
+    attachment = Attachment.find(15)
+    FileUtils.mkdir_p(File.join(attachment.markdownized_preview_directory, 'Pictures'))
+    File.binwrite(File.join(attachment.markdownized_preview_directory, 'Pictures', 'image.png'), 'PNG')
+
+    get(:preview_media, :params => {:id => attachment.id, :path => 'Pictures/image.png'})
+
+    assert_response :unauthorized
+  end
+
+  def test_preview_media_from_private_issue_with_permission
+    @request.session[:user_id] = 2
+
+    attachment = Attachment.find(15)
+    FileUtils.mkdir_p(File.join(attachment.markdownized_preview_directory, 'Pictures'))
+    File.binwrite(File.join(attachment.markdownized_preview_directory, 'Pictures', 'image.png'), 'PNG')
+
+    get(:preview_media, :params => {:id => attachment.id, :path => 'Pictures/image.png'})
+
+    assert_response :success
+    assert_equal 'image/png', response.media_type
+  end
+
+  def test_preview_media_should_be_denied_without_permission
+    @request.session[:user_id] = 3
+
+    attachment = Attachment.find(15)
+    FileUtils.mkdir_p(File.join(attachment.markdownized_preview_directory, 'Pictures'))
+    File.binwrite(File.join(attachment.markdownized_preview_directory, 'Pictures', 'image.png'), 'PNG')
+
+    get(:preview_media, :params => {:id => attachment.id, :path => 'Pictures/image.png'})
+
+    assert_response :forbidden
+  end
+
+  def test_preview_media_should_return_404_for_missing_file
+    @request.session[:user_id] = 2
+
+    get(:preview_media, :params => {:id => 16, :path => 'media/missing.png'})
+
+    assert_response :not_found
+  end
+
+  def test_preview_media_should_return_404_for_invalid_path
+    @request.session[:user_id] = 2
+
+    get(:preview_media, :params => {:id => 16, :path => '../secret.txt'})
+
+    assert_response :not_found
   end
 
   def test_show_other_with_no_preview

@@ -20,11 +20,11 @@
 class AttachmentsController < ApplicationController
   include ActionView::Helpers::NumberHelper
 
-  before_action :find_attachment, :only => [:show, :download, :thumbnail, :update, :destroy]
+  before_action :find_attachment, :only => [:show, :download, :thumbnail, :update, :destroy, :preview_media]
   before_action :find_container, :only => [:edit_all, :update_all, :download_all]
   before_action :find_downloadable_attachments, :only => :download_all
   before_action :find_editable_attachments, :only => [:edit_all, :update_all]
-  before_action :file_readable, :read_authorize, :only => [:show, :download, :thumbnail]
+  before_action :file_readable, :read_authorize, :only => [:show, :download, :thumbnail, :preview_media]
   before_action :update_authorize, :only => :update
   before_action :delete_authorize, :only => :destroy
   before_action :authorize_global, :only => :upload
@@ -33,7 +33,7 @@ class AttachmentsController < ApplicationController
   # MIME type text/javascript.
   skip_after_action :verify_same_origin_request, :only => :download
 
-  accept_api_auth :show, :download, :thumbnail, :upload, :update, :destroy
+  accept_api_auth :show, :download, :thumbnail, :upload, :update, :destroy, :preview_media
 
   def show
     respond_to do |format|
@@ -97,6 +97,19 @@ class AttachmentsController < ApplicationController
       end
     else
       # No thumbnail for the attachment or thumbnail could not be created
+      head :not_found
+    end
+  end
+
+  def preview_media
+    if (media = @attachment.preview_media(params[:path]))
+      if stale?(etag: media, template: false)
+        send_file(media,
+          :type => Redmine::MimeType.of(media).presence || 'application/octet-stream',
+          :filename => "preview_#{@attachment.id}_#{File.basename(media)}",
+          :disposition => 'inline')
+      end
+    else
       head :not_found
     end
   end

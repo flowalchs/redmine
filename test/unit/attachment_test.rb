@@ -683,13 +683,12 @@ class AttachmentTest < ActiveSupport::TestCase
       ),
       :author => User.find(1)
     )
-    preview = attachment.markdownized_preview_cache_path
-    FileUtils.mkdir_p(File.dirname(preview))
-    File.write(preview, "preview")
-    assert File.exist?(preview)
+    preview_dir = attachment.markdownized_preview_directory
+    attachment.markdownized_preview_content
+    assert Dir.exist?(preview_dir)
 
     attachment.send(:delete_from_disk!)
-    assert_not File.exist?(preview)
+    assert_not Dir.exist?(preview_dir)
   end
 
   if convert_installed?

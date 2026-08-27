@@ -35,7 +35,7 @@ module Redmine
       markdownizable_extensions.include?(File.extname(filename.to_s).downcase)
     end
 
-    def self.convert(source, target)
+    def self.convert(source, target, attachment_id)
       return nil unless available?
       return target if File.exist?(target)
 
@@ -45,14 +45,15 @@ module Redmine
       end
 
       directory = File.dirname(target)
+      basedir = File.dirname(Attachment.markdownized_previews_storage_path)
       FileUtils.mkdir_p(directory)
-      args = [COMMAND, source, "-t", "gfm"]
+      args = [COMMAND, source, "-t", "gfm", "--extract-media=markdownized_previews/#{attachment_id}/"]
       pid = nil
       output = Tempfile.new('markdownized-preview')
 
       begin
         Timeout.timeout(PREVIEW_GENERATION_TIMEOUT) do
-          pid = Process.spawn(*args, out: output.path)
+          pid = Process.spawn(*args, chdir: basedir, out: output.path)
           _, status = Process.wait2(pid)
           unless status.success?
             logger.error("Markdownized preview generation failed (#{status.exitstatus}):\nCommand: #{args.shelljoin}")
