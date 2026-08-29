@@ -31,7 +31,8 @@ module Redmine
       'thumbnails_generation_timeout' => 10,
       'markdownized_preview_generation_timeout' => 10,
       'markdownized_preview_max_source_size' => 10.megabytes,
-      'markdownized_preview_max_output_size' => 100.kilobytes
+      'markdownized_preview_max_output_size' => 100.kilobytes,
+      'markdownized_preview_images' => 'render'
     }
 
     @config = nil

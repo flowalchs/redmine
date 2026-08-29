@@ -30,6 +30,8 @@ module Redmine
     PREVIEW_GENERATION_TIMEOUT = Redmine::Configuration['markdownized_preview_generation_timeout'].to_i
     MAX_SOURCE_SIZE = Redmine::Configuration['markdownized_preview_max_source_size'].to_i
     MAX_OUTPUT_SIZE = Redmine::Configuration['markdownized_preview_max_output_size'].to_i
+    IMAGES_MODE = Redmine::Configuration['markdownized_preview_images'].to_s
+    LUA_FILTER = Rails.root.join("extra", "pandoc_filter", "markdownized_preview.lua").freeze
 
     def self.supports?(filename)
       markdownizable_extensions.include?(File.extname(filename.to_s).downcase)
@@ -47,7 +49,14 @@ module Redmine
       directory = File.dirname(target)
       basedir = File.dirname(Attachment.markdownized_previews_storage_path)
       FileUtils.mkdir_p(directory)
-      args = [COMMAND, source, "-t", "gfm", "--extract-media=markdownized_previews/#{attachment_id}/"]
+      args = [COMMAND, source, "-t", "gfm"]
+
+      if IMAGES_MODE == 'placeholder'
+        args << "--lua-filter=#{LUA_FILTER}"
+      else
+        args << "--extract-media=markdownized_previews/#{attachment_id}/"
+      end
+
       pid = nil
       output = Tempfile.new('markdownized-preview')
 

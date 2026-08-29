@@ -380,6 +380,76 @@ class AttachmentsControllerTest < Redmine::ControllerTest
     assert_response :not_found
   end
 
+  def test_show_msword_with_replaced_images
+    skip unless Redmine::Markdownizer.available?
+
+    old = Redmine::Markdownizer::IMAGES_MODE
+    Redmine::Markdownizer.send(:remove_const, :IMAGES_MODE)
+    Redmine::Markdownizer.const_set(:IMAGES_MODE, 'placeholder')
+
+    begin
+      set_tmp_attachments_directory
+
+      a = Attachment.new(
+        :container => Issue.find(1),
+        :file => uploaded_test_file(
+          'msword.docx',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ),
+        :author => User.find(1)
+      )
+      assert a.save
+
+      get(:show, :params => {:id => a.id})
+
+      assert_response :success
+      assert_equal 'text/html', @response.media_type
+
+      assert_select 'div.filecontent.wiki', :text => /Redmine is a flexible project management web application/
+      assert_select 'div.filecontent.wiki img', 0
+      assert_select 'div.filecontent.wiki', :text => /\[🖼️ 1\.png\]/
+      children = Dir.children(a.markdownized_preview_directory)
+      assert_equal ['preview.md'], children
+    ensure
+      Redmine::Markdownizer.send(:remove_const, :IMAGES_MODE)
+      Redmine::Markdownizer.const_set(:IMAGES_MODE, old)
+    end
+  end
+
+  def test_show_libreoffice_with_replaced_images
+    skip unless Redmine::Markdownizer.available?
+
+    old = Redmine::Markdownizer::IMAGES_MODE
+    Redmine::Markdownizer.send(:remove_const, :IMAGES_MODE)
+    Redmine::Markdownizer.const_set(:IMAGES_MODE, 'placeholder')
+
+    begin
+      set_tmp_attachments_directory
+      a = Attachment.new(
+        :container => Issue.find(1),
+        :file => uploaded_test_file(
+          'libreoffice-writer.odt',
+          'application/vnd.oasis.opendocument.text'
+        ),
+        :author => User.find(1)
+      )
+      assert a.save
+
+      get(:show, :params => {:id => a.id})
+
+      assert_response :success
+      assert_equal 'text/html', @response.media_type
+      assert_select 'div.filecontent.wiki', :text => /Redmine is a flexible project management web application/
+      assert_select 'div.filecontent.wiki img', 0
+      assert_select 'div.filecontent.wiki', :text => /\[🖼️ 1\.png\]/
+      children = Dir.children(a.markdownized_preview_directory)
+      assert_equal ['preview.md'], children
+    ensure
+      Redmine::Markdownizer.send(:remove_const, :IMAGES_MODE)
+      Redmine::Markdownizer.const_set(:IMAGES_MODE, old)
+    end
+  end
+
   def test_show_other_with_no_preview
     @request.session[:user_id] = 2
     get(:show, :params => {:id => 6})
