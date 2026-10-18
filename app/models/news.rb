@@ -30,7 +30,9 @@ class News < ApplicationRecord
   validates_length_of :summary, :maximum => 255
 
   acts_as_attachable :edit_permission => :manage_news,
-                     :delete_permission => :manage_news
+                     :delete_permission => :manage_news,
+                     :after_add => :attachment_added,
+                     :after_remove => :attachment_removed
   acts_as_searchable :columns => ['title', 'summary', "#{table_name}.description"],
                      :preload => :project
   acts_as_event :url => Proc.new {|o| {:controller => 'news', :action => 'show', :id => o.id}}
@@ -39,7 +41,7 @@ class News < ApplicationRecord
   acts_as_watchable
   acts_as_webhookable
   acts_as_journalized :activity_type => 'news',
-                      :attributes => %w(title summary),
+                      :attributes => %w(title summary description),
                       :permissions => {
                         :edit_notes => :manage_news,
                         :add_watchers => :manage_news
@@ -66,6 +68,21 @@ class News < ApplicationRecord
   end
 
   attr_reader :current_journal
+
+  # Callback on file attachment
+  def attachment_added(attachment)
+    if current_journal && !attachment.new_record?
+      current_journal.journalize_attachment(attachment, :added)
+    end
+  end
+
+  # Callback on attachment deletion
+  def attachment_removed(attachment)
+    if current_journal && !attachment.new_record?
+      current_journal.journalize_attachment(attachment, :removed)
+      current_journal.save
+    end
+  end
 
   def journal_event_title(journal)
     "#{l(:label_news)}: #{title}"

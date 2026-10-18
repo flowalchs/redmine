@@ -44,8 +44,21 @@
       <span class="journal-info"><%= avatar(journal.user) %> <%= authoring journal.created_on, journal.user, :label => :label_updated_time_by %></span>
     </h4>
     <ul class="details">
-      <% details_to_strings(journal.visible_details).each do |string| %>
-        <li><%= string %></li>
+      <% journal.visible_details.each do |detail| %>
+        <% if detail.property == 'attr' && detail.prop_key == 'description' %>
+          <%# The diff of JournalsController is specific to issues, show it inline %>
+          <li>
+            <%= l(:text_journal_changed_no_detail, :label => content_tag(:strong, l(:field_description))).html_safe %>
+            <details>
+              <summary><%= l(:label_diff) %></summary>
+              <pre class="text-diff"><%= Redmine::Helpers::Diff.new(detail.value, detail.old_value).to_html %></pre>
+            </details>
+          </li>
+        <% else %>
+          <% details_to_strings([detail]).each do |string| %>
+            <li><%= string %></li>
+          <% end %>
+        <% end %>
       <% end %>
     </ul>
     <%= textilizable(journal, :notes) if journal.notes.present? %>

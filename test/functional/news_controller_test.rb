@@ -301,6 +301,32 @@ class NewsControllerTest < Redmine::ControllerTest
     end
   end
 
+  def test_put_update_description_should_create_journal_with_inline_diff
+    @request.session[:user_id] = 2
+    assert_difference 'Journal.count' do
+      put(:update, :params => {:id => 1, :news => {:description => 'Description changed'}})
+    end
+    detail = Journal.order(:id).last.details.first
+    assert_equal ['attr', 'description', 'Description changed'], [detail.property, detail.prop_key, detail.value]
+
+    get(:show, :params => {:id => 1})
+    assert_response :success
+    assert_select '#history .journal ul.details li details pre.text-diff'
+    assert_select '#history a[href*="/journals/"]', 0
+  end
+
+  def test_put_update_with_attachment_should_create_journal
+    set_tmp_attachments_directory
+    @request.session[:user_id] = 2
+    attachment = Attachment.create!(:file => uploaded_test_file('testfile.txt', 'text/plain'), :author_id => 2)
+    assert_difference 'Journal.count' do
+      put(:update, :params => {:id => 1, :news => {:title => News.find(1).title},
+                               :attachments => {'1' => {'token' => attachment.token}}})
+    end
+    detail = Journal.order(:id).last.details.first
+    assert_equal ['attachment', attachment.id.to_s, 'testfile.txt'], [detail.property, detail.prop_key, detail.value]
+  end
+
   def test_show_should_display_history
     news = News.find(1)
     news.init_journal(User.find(2))
