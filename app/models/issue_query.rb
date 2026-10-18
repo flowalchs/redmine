@@ -477,8 +477,9 @@ class IssueQuery < Query
   # Returns the journals
   # Valid options are :order, :offset, :limit
   def journals(options={})
-    Issue.journal_visibility_scope(
-      Journal.visible.where(journalized_type: 'Issue')).
+    Journal.visible.
+      joins_journalized(Issue).
+      joins("INNER JOIN #{IssueStatus.table_name} ON #{IssueStatus.table_name}.id = #{Issue.table_name}.status_id").
       where(statement).
       order(options[:order]).
       limit(options[:limit]).
