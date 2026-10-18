@@ -1,0 +1,117 @@
+name: Journal benchmark
+
+# Compares the journal queries of 7.0-stable and the Journal decoupling
+# patch (#44274) with extra/benchmarks/bench_journals.rb.
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: 'Baseline ref (default: merge base with the patch)'
+        required: false
+      patch_ref:
+        description: 'Patch branch'
+        required: false
+        default: 'journal-decoupling'
+      issues:
+        description: 'Number of issues'
+        required: false
+        default: '20000'
+
+jobs:
+  benchmark:
+    name: benchmark ${{ matrix.db }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    strategy:
+      matrix:
+        db: ['postgresql', 'mysql2', 'sqlite3']
+      fail-fast: false
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: redmine_test
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: redmine_test
+          MYSQL_ROOT_PASSWORD: 'root'
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    env:
+      RAILS_ENV: test
+      PATCH_REF: ${{ inputs.patch_ref || 'journal-decoupling' }}
+      ISSUES: ${{ inputs.issues || '20000' }}
+      JOURNALS_PER_ISSUE: '10'
+      ITER: '7'
+      ROUNDS: '3'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Redmine test environment
+        uses: ./.github/actions/setup-redmine
+        with:
+          db-type: ${{ matrix.db }}
+          ruby-version: '3.4'
+
+      - name: Load default data
+        run: bin/rails redmine:load_default_data REDMINE_LANG=en
+
+      - name: Resolve refs and copy scripts
+        run: |
+          git fetch -q origin "$PATCH_REF"
+          patch_sha=$(git rev-parse FETCH_HEAD)
+          base_sha="${{ inputs.base_ref }}"
+          [ -z "$base_sha" ] && base_sha=$(git merge-base "$patch_sha" HEAD)
+          echo "BASE_SHA=$base_sha" >> "$GITHUB_ENV"
+          echo "PATCH_SHA=$patch_sha" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/bench"
+          cp extra/benchmarks/bench_journals.rb .github/scripts/compare_journal_benchmark.py "$RUNNER_TEMP/bench/"
+          git log --oneline -1 "$base_sha"
+          git log --oneline "$base_sha..$patch_sha"
+
+      - name: Create benchmark data
+        run: ONLY=none ITER=1 bin/rails r "$RUNNER_TEMP/bench/bench_journals.rb"
+
+      - name: Run benchmark
+        env:
+          BENCH_OUT: ${{ runner.temp }}/bench
+        run: |
+          {
+            echo "## Journal benchmark (${{ matrix.db }})"
+            echo
+            echo "Baseline: \`$BASE_SHA\`, patch: \`$PATCH_SHA\` ($PATCH_REF). Median of $ROUNDS alternating runs of $ITER iterations each."
+            echo
+            python3 "$RUNNER_TEMP/bench/compare_journal_benchmark.py" "$RUNNER_TEMP/bench/bench_journals.rb" "$ROUNDS" "$BASE_SHA" "$PATCH_SHA"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload benchmark output
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: journal-benchmark-${{ matrix.db }}
+          path: ${{ runner.temp }}/bench/*.txt
+          if-no-files-found: ignore
