@@ -1726,6 +1726,10 @@ class Issue < ApplicationRecord
     end
   end
 
+  def self.journal_visible_join_condition(user=User.current, options={})
+    "(#{visible_condition(user, options)}) AND #{Journal.visible_notes_condition(user, :skip_pre_condition => true)}"
+  end
+
   def self.journal_activity_preload
     [{:journalized => [:project, :tracker]}, :user]
   end

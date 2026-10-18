@@ -64,10 +64,21 @@ class Journal < ApplicationRecord
     user = args.shift || User.current
     options = args.shift || {}
 
-    conditions = Redmine::Acts::Journalized.journalized_classes.map do |klass|
-      "(#{klass.journal_visible_condition(user, options)})"
+    classes = Redmine::Acts::Journalized.journalized_classes
+    # Only consider the types the current scope is restricted to (eg. activity)
+    if (types = Array(where_values_hash['journalized_type'])).any?
+      classes = classes.select {|klass| types.include?(klass.polymorphic_name)}
     end
-    conditions.empty? ? none : where(conditions.join(' OR '))
+
+    if classes.size == 1 && (condition = classes.first.journal_visible_join_condition(user, options))
+      # Joining the journalized table lets the database use the same query
+      # plans as before journals were decoupled from issues
+      joins_journalized(classes.first).where(condition)
+    elsif classes.any?
+      where(classes.map {|klass| "(#{klass.journal_visible_condition(user, options)})"}.join(' OR '))
+    else
+      none
+    end
   end)
 
   safe_attributes(

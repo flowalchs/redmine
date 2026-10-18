@@ -82,6 +82,24 @@ class Redmine::Acts::JournalizedTest < ActiveSupport::TestCase
     assert_not journal.editable_by?(User.find(2))
   end
 
+  def test_visible_should_join_journalized_table_when_restricted_to_one_type
+    sql = Journal.where(:journalized_type => 'Issue').visible(User.anonymous).to_sql
+    assert_include 'INNER JOIN issues', sql
+    assert_not_include 'EXISTS (SELECT 1 FROM "issues"', sql
+  end
+
+  def test_visible_should_use_exists_conditions_for_several_types
+    sql = Journal.visible(User.anonymous).to_sql
+    assert_not_include 'INNER JOIN issues', sql
+    assert_include "journals.journalized_type = 'News' AND EXISTS", sql
+  end
+
+  def test_visible_with_join_and_exists_conditions_should_return_the_same_issue_journals
+    user = User.find(2)
+    assert_equal Journal.where(:journalized_type => 'Issue').visible(user).ids.sort,
+                 Journal.where(:journalized_type => 'Issue').where(Issue.journal_visible_condition(user)).ids.sort
+  end
+
   def test_joins_journalized_should_join_journalized_table_and_project
     journals = Journal.joins_journalized(Issue).where(:issues => {:project_id => 1})
 

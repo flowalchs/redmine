@@ -477,8 +477,8 @@ class IssueQuery < Query
   # Returns the journals
   # Valid options are :order, :offset, :limit
   def journals(options={})
-    Journal.visible.
-      joins_journalized(Issue).
+    Journal.joins_journalized(Issue).
+      visible.
       joins("INNER JOIN #{IssueStatus.table_name} ON #{IssueStatus.table_name}.id = #{Issue.table_name}.status_id").
       where(statement).
       order(options[:order]).

@@ -107,6 +107,17 @@ module Redmine
       end
 
       module SingletonMethods
+        # Returns a SQL condition on the tables joined by journal_joins that
+        # restricts journals to the ones visible to user, including private
+        # notes, or nil if the model does not provide one.
+        #
+        # Journal.visible uses it when only the journals of this type are
+        # queried. Joins usually perform better than the EXISTS subquery of
+        # journal_visible_condition, which is used otherwise.
+        def journal_visible_join_condition(user=User.current, options={})
+          nil
+        end
+
         # Returns a SQL condition that restricts journals to the journals
         # of this type that are visible to user, including private notes
         def journal_visible_condition(user=User.current, options={})

@@ -101,7 +101,7 @@ class JournalsController < ApplicationController
 
   def find_journal
     # Only issue journals are handled by this controller for now
-    @journal = Journal.visible.where(:journalized_type => 'Issue').find(params[:id])
+    @journal = Journal.where(:journalized_type => 'Issue').visible.find(params[:id])
     @project = @journal.project
   rescue ActiveRecord::RecordNotFound
     render_404
