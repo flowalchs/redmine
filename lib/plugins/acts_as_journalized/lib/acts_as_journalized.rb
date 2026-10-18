@@ -182,7 +182,7 @@ module Redmine
         end
 
         def journal_event_url(journal)
-          {:controller => self.class.model_name.route_key, :action => 'show', :id => id, :anchor => "change-#{journal.id}"}
+          {:controller => self.class.model_name.plural, :action => 'show', :id => id, :anchor => "change-#{journal.id}"}
         end
 
         # Called after a journal is created, if notifications are enabled
