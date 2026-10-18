@@ -28,31 +28,27 @@ class Journal < ApplicationRecord
   has_many :details, lambda {order(:id)}, :class_name => "JournalDetail", :dependent => :delete_all, :inverse_of => :journal
   attr_accessor :indice
 
-  cattr_accessor :journalized_types
-
-  def self.register_journalized_type(klass)
-    self.journalized_types ||= []
-    self.journalized_types << klass unless journalized_types.include?(klass)
+  # Returns journals of klass joined with the table of klass (and its project)
+  def self.joins_journalized(klass)
+    where(:journalized_type => klass.polymorphic_name).joins(*klass.journal_joins)
   end
 
   def self.activity_scope_for(klass)
-    scope = where(journalized_type: klass.name)
-    scope = scope.preload(*klass.journal_activity_preload)
-    klass.journal_activity_scope(scope)
+    klass.journal_activity_scope(joins_journalized(klass).preload(*klass.journal_activity_preload))
   end
 
   def self.register_activity_provider(klass)
-    return if klass.journal_activity_type.blank?
-
+    # Resolve the class at runtime so that the scope survives code reloading
+    class_name = klass.name
     acts_as_activity_provider(
-      type: klass.journal_activity_type,
-      author_key: :user_id,
-      scope: proc { activity_scope_for(klass) }
+      :type => klass.journalized_options[:activity_type],
+      :author_key => :user_id,
+      :scope => proc { activity_scope_for(class_name.constantize) }
     )
   end
 
   acts_as_event(
-    title: proc {|o|  o.journalized.journal_event_title(o) },
+    title: proc {|o| o.journalized.journal_event_title(o) },
     description: :notes,
     author: :user,
     group: :journalized,
@@ -67,16 +63,11 @@ class Journal < ApplicationRecord
   scope :visible, (lambda do |*args|
     user = args.shift || User.current
     options = args.shift || {}
-    visible_scope = none
 
-    journalized_types.each do |klass|
-      relation = where(journalized_type: klass.name)
-      relation = klass.journal_visibility_scope(relation)
-      relation = relation.where(journalized_id: klass.journal_visible_scope(user, options).select(:id))
-      relation = klass.journal_notes_visibility_scope(relation, user, options)
-      visible_scope = visible_scope.or(relation)
+    conditions = Redmine::Acts::Journalized.journalized_classes.map do |klass|
+      "(#{klass.journal_visible_condition(user, options)})"
     end
-    visible_scope
+    conditions.empty? ? none : where(conditions.join(' OR '))
   end)
 
   safe_attributes(
@@ -84,7 +75,7 @@ class Journal < ApplicationRecord
     :if => lambda {|journal, user| journal.new_record? || journal.editable_by?(user)})
   safe_attributes(
     'private_notes',
-    :if => lambda {|journal, user| journal.journalized.journal_private_notes_allowed?(user)})
+    :if => lambda {|journal, user| journal.journalized&.journal_private_notes_allowed?(user)})
   safe_attributes 'updated_by'
 
   # Returns a SQL condition to filter out journals with notes that are not visible to user
@@ -114,13 +105,19 @@ class Journal < ApplicationRecord
     notes.blank? && details.empty?
   end
 
+  # @deprecated Use #journalized instead
+  def issue
+    Rails.application.deprecators[:redmine].warn "Journal#issue is deprecated and will be removed. Use Journal#journalized instead."
+    journalized if journalized_type == 'Issue'
+  end
+
   # Returns journal details that are visible to user
   def visible_details(user=User.current)
     details.select do |detail|
       if detail.property == 'cf'
         detail.custom_field && detail.custom_field.visible_by?(project, user)
       elsif detail.property == 'relation'
-        journalized.journal_relation_visible?(detail, user)
+        journalized&.journal_relation_visible?(detail, user)
       else
         true
       end
@@ -133,8 +130,9 @@ class Journal < ApplicationRecord
     details.detect {|detail| detail.prop_key == attribute}
   end
 
+  # Returns the new status if the journal contains a status change, otherwise nil
   def new_status
-    journalized.journal_new_status(self)
+    journalized&.journal_new_status(self)
   end
 
   def new_value_for(prop)
@@ -142,11 +140,11 @@ class Journal < ApplicationRecord
   end
 
   def editable_by?(usr)
-    journalized.journal_editable_by?(self, usr)
+    journalized.present? && journalized.journal_editable_by?(self, usr)
   end
 
   def project
-    journalized.journal_project
+    journalized&.journal_project
   end
 
   def attachments
@@ -157,7 +155,7 @@ class Journal < ApplicationRecord
   end
 
   def visible?(*)
-    journalized.journal_visible?(*)
+    journalized.present? && journalized.journal_visible?(*)
   end
 
   def attachments_visible?
@@ -183,10 +181,7 @@ class Journal < ApplicationRecord
 
   def notified_users
     notified = journalized.journal_notified_users
-    if private_notes?
-      notified = select_journal_visible_user(notified)
-    end
-    notified
+    select_journal_visible_user(notified)
   end
 
   def recipients
@@ -229,8 +224,10 @@ class Journal < ApplicationRecord
       @attributes_before_change = journalized.journalized_attribute_names.index_with do |attribute|
         journalized.send(attribute)
       end
-      @custom_values_before_change = journalized.custom_field_values.to_h do |c|
-        [c.custom_field_id, c.value]
+      if journalized.respond_to?(:custom_field_values)
+        @custom_values_before_change = journalized.custom_field_values.to_h do |c|
+          [c.custom_field_id, c.value]
+        end
       end
     end
     self
@@ -256,10 +253,6 @@ class Journal < ApplicationRecord
         :prop_key  => relation.relation_type_for(journalized),
         key => relation.other_issue(journalized).try(:id)
       )
-  end
-
-  def valid_watcher?(user)
-    journalized.journal_valid_watcher?(user)
   end
 
   private
@@ -356,7 +349,7 @@ class Journal < ApplicationRecord
   end
 
   def send_notification
-    journalized.journal_notify(self)
+    journalized.journal_notify(self) if notify?
   end
 
   def select_journal_visible_user(notified)

@@ -25,6 +25,9 @@ module Redmine
       ApplicationRecord.include Redmine::Acts::Webhookable
       ApplicationRecord.include Redmine::I18n
 
+      # Journalized types, registered before their classes are loaded
+      Redmine::Acts::Journalized.register 'Issue'
+
       Scm::Base.add "Subversion"
       Scm::Base.add "Mercurial"
       Scm::Base.add "Cvs"
