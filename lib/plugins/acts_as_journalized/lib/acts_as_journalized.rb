@@ -153,13 +153,11 @@ module Redmine
         end
 
         # Returns the SQL joins from the journals table to the table of this
-        # type and, if any, to the projects table
+        # type and, if any, to the projects table. The journals must also be
+        # restricted to this type, see Journal.joins_journalized
         def journal_joins
           journals = Journal.table_name
-          joins = [
-            "INNER JOIN #{table_name} ON #{table_name}.#{primary_key} = #{journals}.journalized_id" \
-            " AND #{journals}.journalized_type = #{connection.quote(polymorphic_name)}"
-          ]
+          joins = ["INNER JOIN #{table_name} ON #{table_name}.#{primary_key} = #{journals}.journalized_id"]
           if (reflection = journal_project_reflection)
             joins << "INNER JOIN #{Project.table_name} ON #{Project.table_name}.id = #{table_name}.#{reflection.foreign_key}"
           end
