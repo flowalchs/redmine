@@ -362,7 +362,7 @@ class MailerTest < ActiveSupport::TestCase
 
   def test_issue_edit_message_id
     journal = Journal.find(3)
-    journal.issue = Issue.find(2)
+    journal.journalized = Issue.find(2)
 
     Mailer.deliver_issue_edit(journal)
     mail = last_email

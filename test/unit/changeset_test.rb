@@ -313,7 +313,7 @@ class ChangesetTest < ActiveSupport::TestCase
       end
       assert issue.reload.closed?
       journal = Journal.order(id: :desc).first
-      assert_equal issue, journal.issue
+      assert_equal issue, journal.journalized
       assert_include "Applied in changeset ecookbook:r12345.", journal.notes
     end
   end

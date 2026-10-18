@@ -46,7 +46,7 @@ class JournalsController < ApplicationController
   end
 
   def diff
-    @issue = @journal.issue
+    @issue = @journal.journalized
     if params[:detail_id].present?
       @detail = @journal.details.find_by_id(params[:detail_id])
     else
@@ -101,7 +101,7 @@ class JournalsController < ApplicationController
 
   def find_journal
     @journal = Journal.visible.find(params[:id])
-    @project = @journal.journalized.project
+    @project = @journal.project
   rescue ActiveRecord::RecordNotFound
     render_404
   end

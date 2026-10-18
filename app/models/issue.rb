@@ -38,7 +38,6 @@ class Issue < ApplicationRecord
   belongs_to :priority, :class_name => 'IssuePriority'
   belongs_to :category, :class_name => 'IssueCategory'
 
-  has_many :journals, :as => :journalized, :dependent => :destroy, :inverse_of => :journalized
   has_many :time_entries, :dependent => :destroy
   has_and_belongs_to_many :changesets, lambda {order("#{Changeset.table_name}.committed_on ASC, #{Changeset.table_name}.id ASC")}
 
@@ -48,6 +47,7 @@ class Issue < ApplicationRecord
   acts_as_attachable :after_add => :attachment_added, :after_remove => :attachment_removed
   acts_as_customizable
   acts_as_watchable
+  acts_as_journalized :activity_type => 'issues'
   acts_as_searchable :columns => ['subject', "#{table_name}.description"],
                      :preload => [:project, :status, :tracker],
                      :scope => lambda {|options| options[:open_issues] ? self.open : self.all}
@@ -1304,9 +1304,8 @@ class Issue < ApplicationRecord
   def self.load_visible_last_updated_by(issues, user=User.current)
     if issues.any?
       issue_ids = issues.map(&:id)
-      journal_ids = Journal.joins(issue: :project).
-        where(:journalized_type => 'Issue', :journalized_id => issue_ids).
-        where(Journal.visible_notes_condition(user, :skip_pre_condition => true)).
+      journals = journal_visibility_scope(Journal.where(journalized_type: 'Issue', journalized_id: issue_ids))
+      journal_ids = journal_notes_visibility_scope(journals, user, skip_pre_condition: true).
         group(:journalized_id).
         maximum(:id).
         values
@@ -1323,9 +1322,8 @@ class Issue < ApplicationRecord
   def self.load_visible_last_notes(issues, user=User.current)
     if issues.any?
       issue_ids = issues.map(&:id)
-      journal_ids = Journal.joins(issue: :project).
-        where(:journalized_type => 'Issue', :journalized_id => issue_ids).
-        where(Journal.visible_notes_condition(user, :skip_pre_condition => true)).
+      journals = journal_visibility_scope(Journal.where(journalized_type: 'Issue', journalized_id: issue_ids))
+      journal_ids = journal_notes_visibility_scope(journals, user, skip_pre_condition: true).
         where.not(notes: '').
         group(:journalized_id).
         maximum(:id).
@@ -1719,6 +1717,107 @@ class Issue < ApplicationRecord
     else
       Tracker.none
     end
+  end
+
+  def self.journal_activity_preload
+    [{ journalized: :project }, { journalized: :tracker }, :user]
+  end
+
+  def self.journal_activity_scope(scope)
+    scope.joins("LEFT OUTER JOIN #{JournalDetail.table_name} ON #{JournalDetail.table_name}.journal_id = #{Journal.table_name}.id").
+          where("#{JournalDetail.table_name}.prop_key = 'status_id' OR #{Journal.table_name}.notes <> ''").distinct
+  end
+
+  def journal_event_title(journal)
+    status = (s = journal_new_status(journal)) ? " (#{s})" : nil
+    "#{tracker} ##{id}#{status}: #{subject}"
+  end
+
+  def journal_event_type(journal)
+    status = journal_new_status(journal)
+    if status
+      status.is_closed? ? 'issue-closed' : 'issue-edit'
+    else
+      'issue-note'
+    end
+  end
+
+  def journal_event_url(journal)
+    {controller: 'issues', action: 'show', id: id, anchor: "change-#{journal.id}"}
+  end
+
+  def self.journal_visibility_scope(scope)
+    scope.joins("INNER JOIN #{Issue.table_name} ON #{Issue.table_name}.id = #{Journal.table_name}.journalized_id").
+          joins("INNER JOIN #{Project.table_name} ON #{Project.table_name}.id = #{Issue.table_name}.project_id")
+  end
+
+  def self.journal_notes_visibility_scope(scope, user, options = {})
+    scope.where(Journal.visible_notes_condition(user, options))
+  end
+
+  def journal_editable_by?(journal, usr)
+    usr && usr.logged? && (usr.allowed_to?(:edit_issue_notes, project) || (journal.user == usr && usr.allowed_to?(:edit_own_issue_notes, project)))
+  end
+
+  def journal_relation_visible?(detail, user)
+    Issue.find_by(id: detail.value || detail.old_value)&.visible?(user)
+  end
+
+  def journal_notify(journal)
+    return unless journal.notify?
+
+    if Setting.notified_events.include?('issue_updated') ||
+       (Setting.notified_events.include?('issue_note_added') && journal.notes.present?) ||
+       (Setting.notified_events.include?('issue_status_updated') && journal_new_status(journal).present?) ||
+       (Setting.notified_events.include?('issue_assigned_to_updated') && journal.detail_for_attribute('assigned_to_id').present?) ||
+       (Setting.notified_events.include?('issue_priority_updated') && journal.new_value_for('priority_id').present?) ||
+       (Setting.notified_events.include?('issue_fixed_version_updated') && journal.detail_for_attribute('fixed_version_id').present?) ||
+       (Setting.notified_events.include?('issue_attachment_added') &&
+         journal.details.any? {|d| d.property == 'attachment' && d.value })
+
+      Mailer.deliver_issue_edit(journal)
+    end
+  end
+
+  def journal_process_watchers(journal)
+    usr = journal.user
+    if usr.is_a?(User) &&
+       usr.pref.auto_watch_on?('issue_contributed_to') &&
+       journal.valid_watcher?(usr)
+      set_watcher(usr, true)
+    end
+
+    assignee = assigned_to
+    if assignee.is_a?(User) &&
+       assignee.pref.auto_watch_on?('issue_assigned_to_me') &&
+       journal.valid_watcher?(assignee)
+      set_watcher(assignee, true)
+    end
+  end
+
+  def self.journal_visible_scope(user = User.current, options = {})
+    joins(:project).where(visible_condition(user, options))
+  end
+
+  def journal_user_can_view_private_notes?(user)
+    user.allowed_to?(:view_private_notes, project)
+  end
+
+  def journal_private_notes_allowed?(user)
+    user.allowed_to?(:set_notes_private, project)
+  end
+
+  def journal_valid_watcher?(user)
+    user.active? &&
+      user.allowed_to?(:add_issue_watchers, project) &&
+      valid_watcher?(user) &&
+      !watched_by?(user)
+  end
+
+  # Returns the new status if the journal contains a status change, otherwise nil
+  def journal_new_status(journal)
+    s = journal.new_value_for('status_id')
+    s ? IssueStatus.find_by_id(s.to_i) : nil
   end
 
   private
