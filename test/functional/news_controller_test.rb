@@ -282,6 +282,35 @@ class NewsControllerTest < Redmine::ControllerTest
     assert_equal 'Description changed by test_post_edit', news.description
   end
 
+  def test_put_update_should_create_journal
+    @request.session[:user_id] = 2
+    assert_difference 'Journal.count' do
+      put(:update, :params => {:id => 1, :news => {:title => 'Title changed'}})
+    end
+    journal = Journal.order(:id).last
+    assert_equal News.find(1), journal.journalized
+    assert_equal User.find(2), journal.user
+    detail = journal.details.first
+    assert_equal ['attr', 'title', 'Title changed'], [detail.property, detail.prop_key, detail.value]
+  end
+
+  def test_put_update_without_changes_should_not_create_journal
+    @request.session[:user_id] = 2
+    assert_no_difference 'Journal.count' do
+      put(:update, :params => {:id => 1, :news => {:title => News.find(1).title}})
+    end
+  end
+
+  def test_show_should_display_history
+    news = News.find(1)
+    news.init_journal(User.find(2))
+    news.update!(:title => 'Title changed')
+
+    get(:show, :params => {:id => 1})
+    assert_response :success
+    assert_select '#history .journal ul.details li', :text => /Title changed/
+  end
+
   def test_put_update_with_attachment
     set_tmp_attachments_directory
     @request.session[:user_id] = 2

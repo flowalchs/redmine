@@ -38,10 +38,17 @@ class News < ApplicationRecord
                             :author_key => :author_id
   acts_as_watchable
   acts_as_webhookable
+  acts_as_journalized :activity_type => 'news',
+                      :attributes => %w(title summary),
+                      :permissions => {
+                        :edit_notes => :manage_news,
+                        :add_watchers => :manage_news
+                      }
   include News::Webhookable
 
   after_create :add_author_as_watcher
   after_create_commit :send_notification
+  after_save :create_journal
 
   scope :visible, (lambda do |*args|
     joins(:project).
@@ -52,6 +59,20 @@ class News < ApplicationRecord
 
   def visible?(user=User.current)
     !user.nil? && user.allowed_to?(:view_news, project)
+  end
+
+  def init_journal(user, notes = '')
+    @current_journal ||= Journal.new(:journalized => self, :user => user, :notes => notes)
+  end
+
+  attr_reader :current_journal
+
+  def journal_event_title(journal)
+    "#{l(:label_news)}: #{title}"
+  end
+
+  def journal_event_type(journal)
+    'news'
   end
 
   # Returns true if the news can be commented by user
@@ -90,6 +111,11 @@ class News < ApplicationRecord
   end
 
   private
+
+  def create_journal
+    current_journal&.save
+    @current_journal = nil
+  end
 
   def add_author_as_watcher
     Watcher.create(:watchable => self, :user => author)

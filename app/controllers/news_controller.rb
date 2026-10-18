@@ -31,6 +31,8 @@ class NewsController < ApplicationController
 
   helper :watchers
   helper :attachments
+  helper :issues
+  helper :custom_fields
 
   def index
     case params[:format]
@@ -68,6 +70,7 @@ class NewsController < ApplicationController
   end
 
   def show
+    @journals = @news.journals.visible.preload(:user, :details).reorder(:id).to_a
     @comments = @news.comments.preload(:commented).to_a
     @comments.reverse! if User.current.wants_comments_in_reverse_order?
 
@@ -105,6 +108,7 @@ class NewsController < ApplicationController
   end
 
   def update
+    @news.init_journal(User.current)
     @news.safe_attributes = params[:news]
     @news.save_attachments(params[:attachments] || (params[:news] && params[:news][:uploads]))
     if @news.save

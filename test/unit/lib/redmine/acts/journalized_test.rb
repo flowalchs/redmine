@@ -24,12 +24,13 @@ class Redmine::Acts::JournalizedTest < ActiveSupport::TestCase
     User.current = nil
     # Use News as a second journalized type
     News.acts_as_journalized unless News.respond_to?(:journalized_options)
+    @news_registered = Redmine::Acts::Journalized.journalized_type_names.include?('News')
     Redmine::Acts::Journalized.register('News')
     @news = News.find(1)
   end
 
   def teardown
-    Redmine::Acts::Journalized.unregister('News')
+    Redmine::Acts::Journalized.unregister('News') unless @news_registered
   end
 
   def test_issue_should_be_registered
@@ -76,9 +77,11 @@ class Redmine::Acts::JournalizedTest < ActiveSupport::TestCase
     assert journal.notified_users.none? {|user| user.roles_for_project(@news.project).include?(Role.find(1)) && !user.admin?}
   end
 
-  def test_editable_by_should_be_false_without_configured_permission
+  def test_editable_by_should_check_configured_permission
     journal = Journal.create!(:journalized => @news, :user => User.find(2), :notes => 'News note')
 
+    assert journal.editable_by?(User.find(2))
+    Role.find(1).remove_permission!(:manage_news)
     assert_not journal.editable_by?(User.find(2))
   end
 
@@ -98,6 +101,16 @@ class Redmine::Acts::JournalizedTest < ActiveSupport::TestCase
     user = User.find(2)
     assert_equal Journal.where(:journalized_type => 'Issue').visible(user).ids.sort,
                  Journal.where(:journalized_type => 'Issue').where(Issue.journal_visible_condition(user)).ids.sort
+  end
+
+  def test_news_journals_should_be_activity_events
+    journal = Journal.create!(:journalized => @news, :user => User.find(2), :notes => 'News note')
+    fetcher = Redmine::Activity::Fetcher.new(User.find(2), :project => @news.project)
+
+    assert_include journal, fetcher.events(nil, nil)
+    assert_equal 'News: eCookbook first release !', journal.event_title
+    assert_equal({:controller => 'news', :action => 'show', :id => 1, :anchor => "change-#{journal.id}"}, journal.event_url)
+    assert fetcher.events(nil, nil, :last_by_project => true).any?
   end
 
   def test_joins_journalized_should_join_journalized_table_and_project

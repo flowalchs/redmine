@@ -27,6 +27,7 @@ module Redmine
 
       # Journalized types, registered before their classes are loaded
       Redmine::Acts::Journalized.register 'Issue'
+      Redmine::Acts::Journalized.register 'News'
 
       Scm::Base.add "Subversion"
       Scm::Base.add "Mercurial"
@@ -409,7 +410,7 @@ module Redmine
       Activity.map do |activity|
         activity.register :issues, :class_name => %w(Issue Journal)
         activity.register :changesets
-        activity.register :news
+        activity.register :news, :class_name => %w(News Journal)
         activity.register :documents, :class_name => %w(Document Attachment)
         activity.register :files, :class_name => 'Attachment'
         activity.register :wiki_edits, :class_name => 'WikiContentVersion', :default => false

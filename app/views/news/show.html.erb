@@ -35,6 +35,25 @@
 </div>
 <br />
 
+<% if @journals.any? %>
+<div id="history" class="journals">
+<h3><%= l(:label_history) %></h3>
+<% @journals.each do |journal| %>
+  <div id="change-<%= journal.id %>" class="<%= journal.css_classes %>">
+    <h4 class="journal-header">
+      <span class="journal-info"><%= avatar(journal.user) %> <%= authoring journal.created_on, journal.user, :label => :label_updated_time_by %></span>
+    </h4>
+    <ul class="details">
+      <% details_to_strings(journal.visible_details).each do |string| %>
+        <li><%= string %></li>
+      <% end %>
+    </ul>
+    <%= textilizable(journal, :notes) if journal.notes.present? %>
+  </div>
+<% end %>
+</div>
+<% end %>
+
 <div id="comments" class="journals">
 <h3 class="comments"><%= l(:label_comment_plural) %></h3>
 <% if @news.commentable? && @comments.size >= 3 %>
